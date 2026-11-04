@@ -1,0 +1,40 @@
+snetwork · iPhone hotspot · 172.20.10.6 on Wi-Fi · tailnet up · all traffic via utun9
+
+interfaces                                        snetwork interfaces
+  en0    Wi-Fi      172.20.10.6/28  up  ← default route
+  utun7  Tailscale  100.64.0.10     up
+  utun9  tunnel     192.168.2.1/24  up
+  + 2 more
+
+subnets                                           snetwork subnets
+  172.20.10.0/28  direct   en0
+  10.20.30.0/24   via vpn  tailscale → alpha
+  10.40.50.0/24   via vpn  tailscale → bravo
+  100.64.0.0/10   via vpn  tailscale          tailnet · 2 of 2 peers online
+  0.0.0.0/0       via vpn  utun9              all traffic, through a VPN that is not Tailscale
+
+devices                                           snetwork devices
+  172.20.10.0/28  1 seen recently  ARP cache, no scan
+  10.20.30.0/24   –                behind alpha: not visible from here
+  10.40.50.0/24   –                behind bravo: not visible from here
+
+dhcp                                              snetwork dhcp
+  en0   from 172.20.10.1 · 24h lease · 23h left
+        router + dns 172.20.10.1 (same box)
+
+dns                                               snetwork dns
+  1  172.20.10.1  router, from DHCP
+
+wifi                                              snetwork wifi
+  name hidden by macOS · 2.4 GHz ch 6 · 20 MHz · -48 dBm · 144.4 Mb/s
+
+vpn                                               snetwork vpn
+  tailscale  connected · alpha ✓ bravo ✓ · no exit node
+  tunnel     utun9 takes all traffic, and is not in System Settings
+
+firewall                                          snetwork firewall
+  macOS app firewall  on · stealth on
+  pf                  unknown without sudo
+
+listening                                         snetwork listening
+  1 port reachable beyond loopback: 22 launchd

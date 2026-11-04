@@ -1,0 +1,8 @@
+subnets
+  10.20.30.0/24  direct   en0                alpha routes it when you are away
+  10.40.50.0/24  via vpn  tailscale → bravo
+  100.64.0.0/10  via vpn  tailscale          tailnet · 2 of 3 peers online
+
+  default routes
+    default  10.20.30.1  en0    in use
+    default  –           utun7  scoped to utun7

@@ -1,0 +1,10 @@
+subnets
+  172.20.10.0/28  direct   en0
+  10.20.30.0/24   via vpn  tailscale → alpha
+  10.40.50.0/24   via vpn  tailscale → bravo
+  100.64.0.0/10   via vpn  tailscale          tailnet · 2 of 2 peers online
+  0.0.0.0/0       via vpn  utun9              all traffic, through a VPN that is not Tailscale
+
+  default routes
+    default  172.20.10.1  en0    in use
+    default  –            utun7  scoped to utun7

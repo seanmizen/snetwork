@@ -1,0 +1,6 @@
+ENVIRONMENT
+  NO_COLOR       any value disables colour (no-color.org)
+  FORCE_COLOR    any value but 0 forces colour, even when piped
+
+EXIT STATUS
+  0 ok  ·  1 couldn't write output  ·  2 bad usage

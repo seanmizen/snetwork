@@ -1,0 +1,27 @@
+interfaces
+  en0      Wi-Fi                10.20.30.102/24  up              ← default route
+    ipv6 fd00::a, 2001:db8:0:1::a, 2001:db8:0:1::b
+    mac 02:00:00:00:00:04 · mtu 1500 · service #2
+  utun7    Tailscale            100.64.0.10      up
+    ipv6 fd7a:115c:a1e0::a
+    mtu 1280
+  en8      USB 10/100/1000 LAN  –                not plugged in
+    service #1
+  en7      iPhone USB           –                not plugged in
+    service #3
+  en9      iPhone USB           –                not plugged in
+    service #4
+  bridge0  Thunderbolt Bridge   –                no link
+    mac 02:00:00:00:00:02 · mtu 1500 · service #5
+  en11     iPhone USB           –                not plugged in
+    service #6
+  anpi0    system               –                no link
+    mac 02:00:00:00:00:01 · mtu 1500
+  awdl0    system               –                up
+    mac 02:00:00:00:00:05 · mtu 1500
+  en1      system               –                no link
+    mac 02:00:00:00:00:02 · mtu 1500
+  utun0    tunnel               –                up
+    mtu 1380
+  lo0      loopback             127.0.0.1/8      up
+    mtu 16384

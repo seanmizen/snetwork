@@ -1,0 +1,12 @@
+vpn
+  tailscale     connected
+  tailnet       owner@example.com
+  magicdns      tail0000.ts.net
+  this machine  laptop  100.64.0.10
+  exit node     none
+
+  peers
+    alpha  linux  ✓ online  routes 10.20.30.0/24  relay fra
+    bravo  linux  ✓ online  routes 10.40.50.0/24  direct 192.0.2.20:41641
+
+  utun9 takes all IPv4 traffic (routes 0/1 and 128.0/1), and is not in System Settings

@@ -1,0 +1,10 @@
+{
+  "BackendState": "Running",
+  "MagicDNSSuffix": "tail0000.ts.net",
+  "CurrentTailnet": {"Name": "owner@example.com"},
+  "Self": {"HostName": "laptop", "DNSName": "laptop.tail0000.ts.net.", "OS": "macOS", "TailscaleIPs": ["100.64.0.10"], "Online": true},
+  "Peer": {
+    "nodekey:1": {"HostName": "alpha", "DNSName": "alpha.tail0000.ts.net.", "OS": "linux", "TailscaleIPs": ["100.64.0.11"], "Online": true, "PrimaryRoutes": ["10.20.30.0/24"], "CurAddr": "", "Relay": "fra", "LastSeen": "0001-01-01T00:00:00Z"},
+    "nodekey:2": {"HostName": "bravo", "DNSName": "bravo.tail0000.ts.net.", "OS": "linux", "TailscaleIPs": ["100.64.0.12"], "Online": true, "PrimaryRoutes": ["10.40.50.0/24"], "CurAddr": "192.0.2.20:41641", "Relay": "fra", "LastSeen": "0001-01-01T00:00:00Z"}
+  }
+}

@@ -1,0 +1,27 @@
+<dictionary> {
+  IPv4 : <array> {
+    0 : <dictionary> {
+      Addresses : <array> {
+        0 : 172.20.10.6
+      }
+      ConfigMethod : DHCP
+      DHCP : <dictionary> {
+        LeaseExpirationTime : 11/04/2026 20:00:00
+        LeaseStartTime : 11/03/2026 20:00:00
+        Packet : op = BOOTREPLY
+options:
+dhcp_message_type (uint8): ACK 0x5
+subnet_mask (ip): 255.255.255.240
+router (ip_mult): {172.20.10.1}
+domain_name_server (ip_mult): {172.20.10.1}
+server_identifier (ip): 172.20.10.1
+lease_time (uint32): 0x15180
+end (none): 
+
+        State : BOUND
+      }
+    }
+  }
+  InterfaceType : WiFi
+  SSID : <redacted>
+}

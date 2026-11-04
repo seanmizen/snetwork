@@ -1,0 +1,75 @@
+{
+  "BackendState": "Running",
+  "MagicDNSSuffix": "tail0000.ts.net",
+  "CurrentTailnet": {
+    "Name": "owner@example.com"
+  },
+  "Self": {
+    "HostName": "Sean's M1 Macbook Pro",
+    "DNSName": "laptop.tail0000.ts.net.",
+    "OS": "macOS",
+    "TailscaleIPs": [
+      "100.64.0.10",
+      "fd7a:115c:a1e0::a"
+    ],
+    "Online": true,
+    "CurAddr": "",
+    "Relay": "fra",
+    "ExitNode": false,
+    "ExitNodeOption": false,
+    "LastSeen": "0001-01-01T00:00:00Z"
+  },
+  "Peer": {
+    "nodekey:0": {
+      "HostName": "localhost",
+      "DNSName": "phone.tail0000.ts.net.",
+      "OS": "iOS",
+      "TailscaleIPs": [
+        "100.64.0.13",
+        "fd7a:115c:a1e0::a"
+      ],
+      "Online": false,
+      "CurAddr": "",
+      "Relay": "ams",
+      "ExitNode": false,
+      "ExitNodeOption": false,
+      "LastSeen": "2026-11-03T17:16:32.1Z"
+    },
+    "nodekey:1": {
+      "HostName": "bravo",
+      "DNSName": "bravo.tail0000.ts.net.",
+      "OS": "linux",
+      "TailscaleIPs": [
+        "100.64.0.12",
+        "fd7a:115c:a1e0::a"
+      ],
+      "Online": true,
+      "PrimaryRoutes": [
+        "10.40.50.0/24"
+      ],
+      "CurAddr": "",
+      "Relay": "fra",
+      "ExitNode": false,
+      "ExitNodeOption": false,
+      "LastSeen": "0001-01-01T00:00:00Z"
+    },
+    "nodekey:2": {
+      "HostName": "alpha",
+      "DNSName": "alpha.tail0000.ts.net.",
+      "OS": "linux",
+      "TailscaleIPs": [
+        "100.64.0.11",
+        "fd7a:115c:a1e0::a"
+      ],
+      "Online": true,
+      "PrimaryRoutes": [
+        "10.20.30.0/24"
+      ],
+      "CurAddr": "10.20.30.108:41641",
+      "Relay": "fra",
+      "ExitNode": false,
+      "ExitNodeOption": false,
+      "LastSeen": "0001-01-01T00:00:00Z"
+    }
+  }
+}

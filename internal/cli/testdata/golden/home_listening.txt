@@ -1,0 +1,14 @@
+listening
+  port   on             family  process
+  4100   all addresses  ipv4    bun (61666)
+  5000   all addresses  ipv6    ControlCenter (643)
+  33894  all addresses  ipv6    IPNExtension (17796)
+  34022  all addresses  ipv4    IPNExtension (17796)
+  49425  all addresses  ipv4    Python (47233)
+  52993  all addresses  ipv4    Python (64116)
+  54953  all addresses  ipv4    Python (49994)
+  57934  all addresses  ipv4    Python (92696)
+  59024  all addresses  ipv4    Python (29251)
+  60752  all addresses  ipv4    Python (46420)
+  62870  all addresses  ipv4    Python (31846)
+  64872  all addresses  both    rapportd (637)

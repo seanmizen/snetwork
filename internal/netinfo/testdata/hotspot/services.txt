@@ -1,0 +1,9 @@
+An asterisk (*) denotes that a network service is disabled.
+(1) USB 10/100/1000 LAN
+(Hardware Port: USB 10/100/1000 LAN, Device: en8)
+
+(2) Wi-Fi
+(Hardware Port: Wi-Fi, Device: en0)
+
+(3) Tailscale
+(Hardware Port: io.tailscale.ipn.macos, Device: )

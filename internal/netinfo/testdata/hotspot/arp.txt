@@ -1,0 +1,2 @@
+? (172.20.10.1) at 02:00:00:00:00:32 on en0 ifscope [ethernet]
+? (172.20.10.15) at ff:ff:ff:ff:ff:ff on en0 ifscope [ethernet]

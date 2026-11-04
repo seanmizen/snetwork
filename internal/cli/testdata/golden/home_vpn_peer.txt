@@ -1,0 +1,2 @@
+vpn
+    bravo  linux  ✓ online  routes 10.40.50.0/24  relay fra

@@ -1,0 +1,2 @@
+wifi
+  en0: Wi-Fi is off

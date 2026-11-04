@@ -1,0 +1,8 @@
+DNS configuration
+
+resolver #1
+  nameserver[0] : 192.168.1.1
+  nameserver[1] : 1.1.1.1
+  if_index : 9 (en8)
+  flags    : Request A records
+  order    : 200000

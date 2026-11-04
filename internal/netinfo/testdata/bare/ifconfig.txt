@@ -1,0 +1,10 @@
+lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
+	inet 127.0.0.1 netmask 0xff000000
+en0: flags=8863<UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST> mtu 1500
+	ether 00:16:3e:00:00:41
+	status: inactive
+en8: flags=8863<UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST> mtu 1500
+	ether 00:16:3e:00:00:42
+	inet 192.168.1.50 netmask 0xffffff00 broadcast 192.168.1.255
+	media: autoselect (1000baseT <full-duplex>)
+	status: active

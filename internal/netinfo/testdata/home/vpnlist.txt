@@ -1,0 +1,4 @@
+Available network connection services in the current set (*=enabled):
+* (Disconnected)   00000000-0000-0000-0000-000000000000 VPN (com.example.vpn) "Example WireGuard®"          [VPN:com.example.vpn]
+* (Connected)      00000000-0000-0000-0000-000000000000 VPN (io.tailscale.ipn.macos) "Tailscale"                      [VPN:io.tailscale.ipn.macos]
+* (Disconnected)   00000000-0000-0000-0000-000000000000 VPN (com.example.vpn) "Example WireGuard"           [VPN:com.example.vpn]

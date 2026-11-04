@@ -1,0 +1,529 @@
+{
+  "taken": "2026-11-03T21:00:00Z",
+  "location": {
+    "kind": "lan",
+    "label": "LAN of alpha",
+    "interface": "en0",
+    "address": "10.20.30.102",
+    "gateway": "10.20.30.1",
+    "router": "alpha"
+  },
+  "interfaces": [
+    {
+      "name": "lo0",
+      "label": "loopback",
+      "kind": "loopback",
+      "state": "up",
+      "ipv4": [
+        "127.0.0.1/8"
+      ],
+      "mtu": 16384,
+      "default_route": false
+    },
+    {
+      "name": "anpi0",
+      "label": "system",
+      "kind": "other",
+      "state": "no link",
+      "mac": "02:00:00:00:00:01",
+      "mtu": 1500,
+      "default_route": false
+    },
+    {
+      "name": "en1",
+      "label": "system",
+      "kind": "other",
+      "state": "no link",
+      "mac": "02:00:00:00:00:02",
+      "mtu": 1500,
+      "default_route": false
+    },
+    {
+      "name": "bridge0",
+      "label": "Thunderbolt Bridge",
+      "kind": "bridge",
+      "state": "no link",
+      "mac": "02:00:00:00:00:02",
+      "mtu": 1500,
+      "default_route": false,
+      "service_order": 5
+    },
+    {
+      "name": "en0",
+      "label": "Wi-Fi",
+      "kind": "wifi",
+      "state": "up",
+      "ipv4": [
+        "10.20.30.102/24"
+      ],
+      "ipv6": [
+        "fd00::a",
+        "2001:db8:0:1::a",
+        "2001:db8:0:1::b"
+      ],
+      "mac": "02:00:00:00:00:04",
+      "mtu": 1500,
+      "default_route": true,
+      "service_order": 2
+    },
+    {
+      "name": "awdl0",
+      "label": "system",
+      "kind": "other",
+      "state": "up",
+      "mac": "02:00:00:00:00:05",
+      "mtu": 1500,
+      "default_route": false
+    },
+    {
+      "name": "utun0",
+      "label": "tunnel",
+      "kind": "tunnel",
+      "state": "up",
+      "mtu": 1380,
+      "default_route": false
+    },
+    {
+      "name": "utun7",
+      "label": "Tailscale",
+      "kind": "tunnel",
+      "state": "up",
+      "ipv4": [
+        "100.64.0.10/32"
+      ],
+      "ipv6": [
+        "fd7a:115c:a1e0::a"
+      ],
+      "mtu": 1280,
+      "default_route": false
+    },
+    {
+      "name": "en8",
+      "label": "USB 10/100/1000 LAN",
+      "kind": "ethernet",
+      "state": "not plugged in",
+      "default_route": false,
+      "service_order": 1
+    },
+    {
+      "name": "en7",
+      "label": "iPhone USB",
+      "kind": "iphone",
+      "state": "not plugged in",
+      "default_route": false,
+      "service_order": 3
+    },
+    {
+      "name": "en9",
+      "label": "iPhone USB",
+      "kind": "iphone",
+      "state": "not plugged in",
+      "default_route": false,
+      "service_order": 4
+    },
+    {
+      "name": "en11",
+      "label": "iPhone USB",
+      "kind": "iphone",
+      "state": "not plugged in",
+      "default_route": false,
+      "service_order": 6
+    }
+  ],
+  "default_routes": [
+    {
+      "prefix": "default",
+      "gateway": "10.20.30.1",
+      "interface": "en0",
+      "flags": "UGScg"
+    },
+    {
+      "prefix": "default",
+      "gateway": "link#29",
+      "interface": "utun7",
+      "flags": "UCSIg"
+    }
+  ],
+  "subnets": [
+    {
+      "prefix": "10.20.30.0/24",
+      "via": "direct",
+      "interface": "en0",
+      "router": "alpha"
+    },
+    {
+      "prefix": "10.40.50.0/24",
+      "via": "vpn",
+      "interface": "utun7",
+      "router": "bravo"
+    },
+    {
+      "prefix": "100.64.0.0/10",
+      "via": "vpn",
+      "interface": "utun7",
+      "note": "tailnet"
+    }
+  ],
+  "devices": [
+    {
+      "prefix": "10.20.30.0/24",
+      "via": "direct",
+      "interface": "en0",
+      "router": "alpha",
+      "count": 11,
+      "devices": [
+        {
+          "ip": "10.20.30.1",
+          "mac": "00:16:3e:00:00:06",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": true
+        },
+        {
+          "ip": "10.20.30.100",
+          "mac": "02:00:00:00:00:07",
+          "interface": "en0",
+          "private_address": true,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.101",
+          "mac": "00:16:3e:00:00:08",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.103",
+          "mac": "00:16:3e:00:00:09",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.105",
+          "mac": "02:00:00:00:00:0a",
+          "interface": "en0",
+          "private_address": true,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.106",
+          "mac": "00:16:3e:00:00:0b",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.107",
+          "mac": "00:16:3e:00:00:0c",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.108",
+          "mac": "00:16:3e:00:00:0d",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.109",
+          "mac": "02:00:00:00:00:0e",
+          "interface": "en0",
+          "private_address": true,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.110",
+          "mac": "02:00:00:00:00:0f",
+          "interface": "en0",
+          "private_address": true,
+          "gateway": false
+        },
+        {
+          "ip": "10.20.30.120",
+          "mac": "00:16:3e:00:00:10",
+          "interface": "en0",
+          "private_address": false,
+          "gateway": false
+        }
+      ]
+    },
+    {
+      "prefix": "10.40.50.0/24",
+      "via": "vpn",
+      "interface": "utun7",
+      "router": "bravo",
+      "count": null
+    }
+  ],
+  "dhcp": [
+    {
+      "interface": "en0",
+      "address": "10.20.30.102",
+      "server": "10.20.30.1",
+      "routers": [
+        "10.20.30.1"
+      ],
+      "dns": [
+        "10.20.30.1"
+      ],
+      "length_ns": 86400000000000,
+      "start": "2026-11-03T18:20:17Z",
+      "expires": "2026-11-04T18:20:17Z",
+      "state": "BOUND"
+    }
+  ],
+  "dns": {
+    "general": [
+      {
+        "search": [
+          "tail0000.ts.net"
+        ],
+        "nameservers": [
+          "100.100.100.100",
+          "fd7a:115c:a1e0::53"
+        ],
+        "interface": "utun7",
+        "flags": [
+          "Supplemental"
+        ],
+        "order": 100800
+      },
+      {
+        "nameservers": [
+          "fe80::1%en0",
+          "10.20.30.1"
+        ],
+        "interface": "en0",
+        "order": 200000
+      }
+    ],
+    "domain": [
+      {
+        "domain": "tail0000.ts.net",
+        "nameservers": [
+          "100.100.100.100",
+          "fd7a:115c:a1e0::53"
+        ],
+        "interface": "utun7",
+        "flags": [
+          "Supplemental"
+        ],
+        "order": 100801
+      },
+      {
+        "domain": "local",
+        "options": "mdns",
+        "order": 300000
+      },
+      {
+        "domain": "254.169.in-addr.arpa",
+        "options": "mdns",
+        "order": 300200
+      },
+      {
+        "domain": "8.e.f.ip6.arpa",
+        "options": "mdns",
+        "order": 300400
+      },
+      {
+        "domain": "9.e.f.ip6.arpa",
+        "options": "mdns",
+        "order": 300600
+      },
+      {
+        "domain": "a.e.f.ip6.arpa",
+        "options": "mdns",
+        "order": 300800
+      },
+      {
+        "domain": "b.e.f.ip6.arpa",
+        "options": "mdns",
+        "order": 301000
+      }
+    ]
+  },
+  "wifi": {
+    "interface": "en0",
+    "power_on": true,
+    "associated": true,
+    "name": "",
+    "band": "5 GHz",
+    "channel": 112,
+    "width": "80 MHz",
+    "rssi_dbm": -59,
+    "noise_dbm": -90,
+    "rate_mbps": 117,
+    "phy": "802.11ac",
+    "security": "WPA2 Personal",
+    "country": "DE"
+  },
+  "vpn": {
+    "tailscale": {
+      "installed": true,
+      "state": "Running",
+      "tailnet": "owner@example.com",
+      "magicdns_suffix": "tail0000.ts.net",
+      "self": {
+        "name": "laptop",
+        "os": "macOS",
+        "ips": [
+          "100.64.0.10",
+          "fd7a:115c:a1e0::a"
+        ],
+        "online": true,
+        "relay": "fra",
+        "exit_node": false
+      },
+      "peers": [
+        {
+          "name": "alpha",
+          "os": "linux",
+          "ips": [
+            "100.64.0.11",
+            "fd7a:115c:a1e0::a"
+          ],
+          "online": true,
+          "routes": [
+            "10.20.30.0/24"
+          ],
+          "direct": "10.20.30.108:41641",
+          "relay": "fra",
+          "exit_node": false
+        },
+        {
+          "name": "bravo",
+          "os": "linux",
+          "ips": [
+            "100.64.0.12",
+            "fd7a:115c:a1e0::a"
+          ],
+          "online": true,
+          "routes": [
+            "10.40.50.0/24"
+          ],
+          "relay": "fra",
+          "exit_node": false
+        },
+        {
+          "name": "phone",
+          "os": "iOS",
+          "ips": [
+            "100.64.0.13",
+            "fd7a:115c:a1e0::a"
+          ],
+          "online": false,
+          "relay": "ams",
+          "exit_node": false,
+          "last_seen": "2026-11-03T17:16:32.1Z"
+        }
+      ]
+    },
+    "others": [
+      {
+        "name": "Example WireGuard®",
+        "state": "Disconnected",
+        "enabled": true
+      },
+      {
+        "name": "Example WireGuard",
+        "state": "Disconnected",
+        "enabled": true
+      }
+    ]
+  },
+  "firewall": {
+    "application_firewall": "on",
+    "stealth_mode": "off",
+    "pf": "unknown without sudo"
+  },
+  "listening": [
+    {
+      "port": 4100,
+      "address": "*",
+      "family": "ipv4",
+      "process": "bun",
+      "pid": 61666
+    },
+    {
+      "port": 5000,
+      "address": "*",
+      "family": "ipv6",
+      "process": "ControlCenter",
+      "pid": 643
+    },
+    {
+      "port": 33894,
+      "address": "*",
+      "family": "ipv6",
+      "process": "IPNExtension",
+      "pid": 17796
+    },
+    {
+      "port": 34022,
+      "address": "*",
+      "family": "ipv4",
+      "process": "IPNExtension",
+      "pid": 17796
+    },
+    {
+      "port": 49425,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 47233
+    },
+    {
+      "port": 52993,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 64116
+    },
+    {
+      "port": 54953,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 49994
+    },
+    {
+      "port": 57934,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 92696
+    },
+    {
+      "port": 59024,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 29251
+    },
+    {
+      "port": 60752,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 46420
+    },
+    {
+      "port": 62870,
+      "address": "*",
+      "family": "ipv4",
+      "process": "Python",
+      "pid": 31846
+    },
+    {
+      "port": 64872,
+      "address": "*",
+      "family": "both",
+      "process": "rapportd",
+      "pid": 637
+    }
+  ]
+}

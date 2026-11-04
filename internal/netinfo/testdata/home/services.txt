@@ -1,0 +1,28 @@
+An asterisk (*) denotes that a network service is disabled.
+(1) USB 10/100/1000 LAN
+(Hardware Port: USB 10/100/1000 LAN, Device: en8)
+
+(2) Wi-Fi
+(Hardware Port: Wi-Fi, Device: en0)
+
+(3) iPhone USB
+(Hardware Port: iPhone USB, Device: en7)
+
+(4) iPhone USB 2
+(Hardware Port: iPhone USB, Device: en9)
+
+(5) Thunderbolt Bridge
+(Hardware Port: Thunderbolt Bridge, Device: bridge0)
+
+(6) iPhone USB 3
+(Hardware Port: iPhone USB, Device: en11)
+
+(7) Example WireGuard
+(Hardware Port: com.example.vpn, Device: )
+
+(8) Example WireGuard®
+(Hardware Port: com.example.vpn, Device: )
+
+(9) Tailscale
+(Hardware Port: io.tailscale.ipn.macos, Device: )
+

@@ -1,0 +1,25 @@
+<dictionary> {
+  IPv4 : <array> {
+    0 : <dictionary> {
+      Addresses : <array> {
+        0 : 192.168.1.50
+      }
+      ConfigMethod : DHCP
+      DHCP : <dictionary> {
+        LeaseExpirationTime : 11/03/2026 20:00:00
+        LeaseStartTime : 11/03/2026 19:55:00
+        Packet : op = BOOTREPLY
+options:
+router (ip_mult): {192.168.1.1}
+domain_name_server (ip_mult): {192.168.1.1, 1.1.1.1}
+domain_name (string): lan.example
+server_identifier (ip): 192.168.1.1
+lease_time (uint32): 0x12c
+end (none): 
+
+        State : BOUND
+      }
+    }
+  }
+  InterfaceType : Ethernet
+}

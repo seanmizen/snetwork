@@ -1,0 +1,23 @@
+snetwork test · where am I on the network, at a glance
+
+USAGE
+  snetwork                       the summary: every section, a few lines each
+  snetwork SECTION [ITEM]       one section in full · see snetwork -h sections
+  snetwork all                   every section in full
+
+OUTPUT
+  -json                  the same data as JSON
+  -no-color              no colour (also off when output is not a terminal)
+
+OTHER
+  -v, -version           print the version
+  -h, -help [TOPIC]      this help · topics: sections, env
+
+EXAMPLES
+  snetwork vpn                   # tailnet peers, and which subnets they route
+  snetwork interfaces en0
+  snetwork all > network.txt     # everything, no colour
+  snetwork dhcp -json | jq .
+
+Passive: snetwork reads this machine's own state and sends no packets.
+Flags go before or after the section, and -json and --json both work.

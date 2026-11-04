@@ -1,0 +1,91 @@
+DNS configuration
+
+resolver #1
+  search domain[0] : tail0000.ts.net
+  nameserver[0] : 100.100.100.100
+  nameserver[1] : fd7a:115c:a1e0::53
+  if_index : 29 (utun7)
+  flags    : Supplemental, Request A records, Request AAAA records
+  reach    : 0x00000003 (Reachable,Transient Connection)
+  order    : 100800
+
+resolver #2
+  nameserver[0] : fe80::1%en0
+  nameserver[1] : 10.20.30.1
+  if_index : 11 (en0)
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00020002 (Reachable,Directly Reachable Address)
+  order    : 200000
+
+resolver #3
+  domain   : tail0000.ts.net.
+  nameserver[0] : 100.100.100.100
+  nameserver[1] : fd7a:115c:a1e0::53
+  if_index : 29 (utun7)
+  flags    : Supplemental, Request A records, Request AAAA records
+  reach    : 0x00000003 (Reachable,Transient Connection)
+  order    : 100801
+
+resolver #4
+  domain   : local
+  options  : mdns
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00000000 (Not Reachable)
+  order    : 300000
+
+resolver #5
+  domain   : 254.169.in-addr.arpa
+  options  : mdns
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00000000 (Not Reachable)
+  order    : 300200
+
+resolver #6
+  domain   : 8.e.f.ip6.arpa
+  options  : mdns
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00000000 (Not Reachable)
+  order    : 300400
+
+resolver #7
+  domain   : 9.e.f.ip6.arpa
+  options  : mdns
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00000000 (Not Reachable)
+  order    : 300600
+
+resolver #8
+  domain   : a.e.f.ip6.arpa
+  options  : mdns
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00000000 (Not Reachable)
+  order    : 300800
+
+resolver #9
+  domain   : b.e.f.ip6.arpa
+  options  : mdns
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00000000 (Not Reachable)
+  order    : 301000
+
+DNS configuration (for scoped queries)
+
+resolver #1
+  nameserver[0] : fe80::1%en0
+  nameserver[1] : 10.20.30.1
+  if_index : 11 (en0)
+  flags    : Scoped, Request A records, Request AAAA records
+  reach    : 0x00020002 (Reachable,Directly Reachable Address)
+
+resolver #2
+  nameserver[0] : 100.100.100.100
+  nameserver[1] : fd7a:115c:a1e0::53
+  if_index : 29 (utun7)
+  flags    : Scoped, Request A records, Request AAAA records
+  reach    : 0x00000003 (Reachable,Transient Connection)

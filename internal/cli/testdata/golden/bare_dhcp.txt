@@ -1,0 +1,8 @@
+dhcp
+  en8   from 192.168.1.1 · 5m lease · expired 1h ago
+        router 192.168.1.1 · dns 192.168.1.1, 1.1.1.1
+        address  192.168.1.50
+        domain   lan.example
+        started  19:55 today
+        expires  20:00 today
+        state    bound

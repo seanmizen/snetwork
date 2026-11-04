@@ -1,0 +1,7 @@
+dhcp
+  en0   from 10.20.30.1 · 24h lease · 21h 20m left
+        router + dns 10.20.30.1 (same box)
+        address  10.20.30.102
+        started  18:20 today
+        expires  18:20 tomorrow
+        state    bound

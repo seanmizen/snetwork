@@ -1,0 +1,11 @@
+wifi
+  network    name hidden by macOS (grant Location to your terminal to see it)
+  interface  en0
+  channel    112 · 5 GHz · 80 MHz
+  signal     -59 dBm
+  noise      -90 dBm
+  snr        31 dB
+  rate       117 Mb/s
+  standard   802.11ac
+  security   WPA2 Personal
+  country    DE

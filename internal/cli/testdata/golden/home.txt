@@ -1,0 +1,38 @@
+snetwork · LAN of alpha · 10.20.30.102 on Wi-Fi · tailnet up
+
+interfaces                                        snetwork interfaces
+  en0    Wi-Fi                10.20.30.102/24  up              ← default route
+  utun7  Tailscale            100.64.0.10      up
+  en8    USB 10/100/1000 LAN  –                not plugged in
+  + 9 more
+
+subnets                                           snetwork subnets
+  10.20.30.0/24  direct   en0                alpha routes it when you are away
+  10.40.50.0/24  via vpn  tailscale → bravo
+  100.64.0.0/10  via vpn  tailscale          tailnet · 2 of 3 peers online
+
+devices                                           snetwork devices
+  10.20.30.0/24  11 seen recently  ARP cache, no scan
+  10.40.50.0/24  –                 behind bravo: not visible from here
+
+dhcp                                              snetwork dhcp
+  en0   from 10.20.30.1 · 24h lease · 21h 20m left
+        router + dns 10.20.30.1 (same box)
+
+dns                                               snetwork dns
+  1  100.100.100.100  tailscale MagicDNS  search tail0000.ts.net
+  2  10.20.30.1       router, from DHCP
+
+wifi                                              snetwork wifi
+  name hidden by macOS · 5 GHz ch 112 · 80 MHz · -59 dBm · 117 Mb/s
+
+vpn                                               snetwork vpn
+  tailscale  connected · alpha ✓ bravo ✓ phone ✗ · no exit node
+  others     Example WireGuard® off · Example WireGuard off
+
+firewall                                          snetwork firewall
+  macOS app firewall  on · stealth off
+  pf                  unknown without sudo
+
+listening                                         snetwork listening
+  12 ports reachable beyond loopback: 4100 bun, 5000 ControlCenter, 33894 IPNExtension, 34022 IPNExtension, 49425 Python, …

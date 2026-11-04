@@ -1,0 +1,65 @@
+<dictionary> {
+  BSSID : <redacted>
+  ConnectionID : 13
+  IPv4 : <array> {
+    0 : <dictionary> {
+      Addresses : <array> {
+        0 : 10.20.30.102
+      }
+      ChildServiceID : LINKLOCAL-en0
+      ConfigMethod : DHCP
+      DHCP : <dictionary> {
+        LeaseExpirationTime : 11/04/2026 18:20:17
+        LeaseStartTime : 11/03/2026 18:20:17
+        Packet : op = BOOTREPLY
+htype = 1
+flags = 0x0
+hlen = 6
+hops = 0
+xid = 0x99619155
+secs = 0
+ciaddr = 0.0.0.0
+yiaddr = 10.20.30.102
+siaddr = 0.0.0.0
+giaddr = 0.0.0.0
+chaddr = 02:00:00:00:00:04
+sname = 
+file = 
+options:
+Options count is 7
+dhcp_message_type (uint8): ACK 0x5
+subnet_mask (ip): 255.255.255.0
+router (ip_mult): {10.20.30.1}
+domain_name_server (ip_mult): {10.20.30.1}
+server_identifier (ip): 10.20.30.1
+lease_time (uint32): 0x15180
+end (none): 
+
+        State : BOUND
+      }
+      IsPublished : TRUE
+      Router : 10.20.30.1
+      RouterARPVerified : TRUE
+      ServiceID : 00000000-0000-0000-0000-000000000000
+      SubnetMasks : <array> {
+        0 : 255.255.255.0
+      }
+    }
+    1 : <dictionary> {
+      ConfigMethod : LinkLocal
+      IsPublished : TRUE
+      ParentServiceID : 00000000-0000-0000-0000-000000000000
+      ServiceID : LINKLOCAL-en0
+    }
+  }
+  IPv6 : <array> {
+    0 : <dictionary> {
+      ConfigMethod : Automatic
+    }
+  }
+  InterfaceType : WiFi
+  LinkStatusActive : TRUE
+  NetworkID : <redacted>
+  SSID : <redacted>
+  Security : WPA2_PSK
+}

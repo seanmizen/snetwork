@@ -1,0 +1,4 @@
+interfaces
+  en0  Wi-Fi  10.20.30.102/24  up  ← default route
+    ipv6 fd00::a, 2001:db8:0:1::a, 2001:db8:0:1::b
+    mac 02:00:00:00:00:04 · mtu 1500 · service #2

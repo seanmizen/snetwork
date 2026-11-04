@@ -1,0 +1,42 @@
+name: release
+
+# tag and push to cut a release:
+#   git tag v1.0.0 && git push origin v1.0.0
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # macOS: the darwin builds use cgo for CoreWLAN, the Wi-Fi reader
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # git describe needs full history
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod # tracks the go directive, currently 1.27.1
+
+      - name: vet
+        run: go vet ./...
+
+      - name: test
+        run: go test ./...
+
+      - name: build archives
+        run: make release VERSION="${GITHUB_REF_NAME#v}"
+
+      - name: publish
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt
+          generate_release_notes: true

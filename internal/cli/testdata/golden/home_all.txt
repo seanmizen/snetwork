@@ -1,0 +1,124 @@
+snetwork · LAN of alpha · 10.20.30.102 on Wi-Fi · tailnet up
+
+interfaces
+  en0      Wi-Fi                10.20.30.102/24  up              ← default route
+    ipv6 fd00::a, 2001:db8:0:1::a, 2001:db8:0:1::b
+    mac 02:00:00:00:00:04 · mtu 1500 · service #2
+  utun7    Tailscale            100.64.0.10      up
+    ipv6 fd7a:115c:a1e0::a
+    mtu 1280
+  en8      USB 10/100/1000 LAN  –                not plugged in
+    service #1
+  en7      iPhone USB           –                not plugged in
+    service #3
+  en9      iPhone USB           –                not plugged in
+    service #4
+  bridge0  Thunderbolt Bridge   –                no link
+    mac 02:00:00:00:00:02 · mtu 1500 · service #5
+  en11     iPhone USB           –                not plugged in
+    service #6
+  anpi0    system               –                no link
+    mac 02:00:00:00:00:01 · mtu 1500
+  awdl0    system               –                up
+    mac 02:00:00:00:00:05 · mtu 1500
+  en1      system               –                no link
+    mac 02:00:00:00:00:02 · mtu 1500
+  utun0    tunnel               –                up
+    mtu 1380
+  lo0      loopback             127.0.0.1/8      up
+    mtu 16384
+
+subnets
+  10.20.30.0/24  direct   en0                alpha routes it when you are away
+  10.40.50.0/24  via vpn  tailscale → bravo
+  100.64.0.0/10  via vpn  tailscale          tailnet · 2 of 3 peers online
+
+  default routes
+    default  10.20.30.1  en0    in use
+    default  –           utun7  scoped to utun7
+
+devices
+  10.20.30.0/24  direct · en0 · 11 seen recently  ARP cache, no scan
+    10.20.30.102  this machine
+    10.20.30.1    00:16:3e:00:00:06  gateway
+    10.20.30.100  02:00:00:00:00:07  private address
+    10.20.30.101  00:16:3e:00:00:08
+    10.20.30.103  00:16:3e:00:00:09
+    10.20.30.105  02:00:00:00:00:0a  private address
+    10.20.30.106  00:16:3e:00:00:0b
+    10.20.30.107  00:16:3e:00:00:0c
+    10.20.30.108  00:16:3e:00:00:0d
+    10.20.30.109  02:00:00:00:00:0e  private address
+    10.20.30.110  02:00:00:00:00:0f  private address
+    10.20.30.120  00:16:3e:00:00:10
+
+  10.40.50.0/24  via vpn · tailscale  behind bravo: not visible from here
+
+dhcp
+  en0   from 10.20.30.1 · 24h lease · 21h 20m left
+        router + dns 10.20.30.1 (same box)
+        address  10.20.30.102
+        started  18:20 today
+        expires  18:20 tomorrow
+        state    bound
+
+dns
+  any name, asked in this order
+    1  100.100.100.100     tailscale MagicDNS
+       fd7a:115c:a1e0::53  tailscale MagicDNS
+       on utun7 · search tail0000.ts.net · supplemental
+    2  fe80::1%en0  router (IPv6 link-local)
+       10.20.30.1   router, from DHCP
+       on en0
+
+  only for one domain
+    tail0000.ts.net          100.100.100.100  tailscale MagicDNS
+    local + 5 reverse zones  multicast DNS    answers stay on the local network
+
+wifi
+  network    name hidden by macOS (grant Location to your terminal to see it)
+  interface  en0
+  channel    112 · 5 GHz · 80 MHz
+  signal     -59 dBm
+  noise      -90 dBm
+  snr        31 dB
+  rate       117 Mb/s
+  standard   802.11ac
+  security   WPA2 Personal
+  country    DE
+
+vpn
+  tailscale     connected
+  tailnet       owner@example.com
+  magicdns      tail0000.ts.net
+  this machine  laptop  100.64.0.10, fd7a:115c:a1e0::a
+  exit node     none
+
+  peers
+    alpha  linux  ✓ online   routes 10.20.30.0/24  direct 10.20.30.108:41641
+    bravo  linux  ✓ online   routes 10.40.50.0/24  relay fra
+    phone  iOS    ✗ offline                        last seen 3h 43m ago
+
+  other VPNs in System Settings
+    Example WireGuard®  off
+    Example WireGuard   off
+
+firewall
+  macOS app firewall  on · stealth off
+  pf                  unknown without sudo
+  pf needs root to read: sudo pfctl -s info
+
+listening
+  port   on             family  process
+  4100   all addresses  ipv4    bun (61666)
+  5000   all addresses  ipv6    ControlCenter (643)
+  33894  all addresses  ipv6    IPNExtension (17796)
+  34022  all addresses  ipv4    IPNExtension (17796)
+  49425  all addresses  ipv4    Python (47233)
+  52993  all addresses  ipv4    Python (64116)
+  54953  all addresses  ipv4    Python (49994)
+  57934  all addresses  ipv4    Python (92696)
+  59024  all addresses  ipv4    Python (29251)
+  60752  all addresses  ipv4    Python (46420)
+  62870  all addresses  ipv4    Python (31846)
+  64872  all addresses  both    rapportd (637)
