@@ -258,7 +258,8 @@
           "name": "printer",
           "name_source": "ssh config"
         }
-      ]
+      ],
+      "self": "10.20.30.102"
     },
     {
       "prefix": "10.40.50.0/24",

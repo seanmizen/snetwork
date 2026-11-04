@@ -296,7 +296,10 @@ func devicesFull(s netinfo.Snapshot, item string, st Style) (string, error) {
 		}
 		var rows [][]cell
 		var also [][]string // per row, extra addresses
-		if self := selfAddr(s, g); self != "" {
+		if g.AskedVia != "" && g.Self != "" {
+			rows = append(rows, []cell{c(g.Self), cs(roleName, g.AskedVia), c(""), c(""), cs(roleHint, "answered for this subnet")})
+			also = append(also, nil)
+		} else if self := selfAddr(s, g); self != "" {
 			rows = append(rows, []cell{c(self), cs(roleHint, "this machine"), c(""), c(""), c("")})
 			also = append(also, nil)
 		}
@@ -950,8 +953,12 @@ func groupStatus(s netinfo.Snapshot, g netinfo.DeviceGroup, st Style) []cell {
 			hint += " · snetwork devices " + g.Prefix + " asks it"
 		}
 		return []cell{c("–"), cs(roleHint, hint)}
+	case g.AskedVia != "" && g.Swept && g.Probed > 0:
+		return []cell{cf("", "%d found", *g.Count), cs(roleHint, fmt.Sprintf("swept %d addresses · asked %s", g.Probed, g.AskedVia))}
+	case g.AskedVia != "" && g.Swept:
+		return []cell{cf("", "%d found", *g.Count), cs(roleHint, "swept · asked "+g.AskedVia)}
 	case g.AskedVia != "":
-		return []cell{cf("", "%d seen", *g.Count), cs(roleHint, "asked "+g.AskedVia)}
+		return []cell{cf("", "%d seen recently", *g.Count), cs(roleHint, "ARP cache · asked "+g.AskedVia)}
 	}
 	if sw := sweepOf(s, g.Prefix); sw != nil {
 		switch {

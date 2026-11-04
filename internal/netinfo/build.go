@@ -105,7 +105,7 @@ func RebuildDevices(s *Snapshot, r Raw) {
 			if fresh[i].Count == nil {
 				fresh[i] = old // a remote router's answer
 			} else {
-				fresh[i].Swept = old.Swept
+				fresh[i].Swept, fresh[i].Probed = old.Swept, old.Probed
 			}
 		}
 	}
@@ -221,6 +221,11 @@ func buildDevices(subnets []Subnet, arp []arpEntry, defs []Route, own map[string
 		g := DeviceGroup{Prefix: sn.Prefix, Via: sn.Via, Interface: sn.Interface, Router: sn.Router}
 		if sn.Via == "direct" {
 			p := netip.MustParsePrefix(sn.Prefix)
+			for a := range own {
+				if ip, err := netip.ParseAddr(a); err == nil && p.Contains(ip) && (g.Self == "" || ip.Less(netip.MustParseAddr(g.Self))) {
+					g.Self = a
+				}
+			}
 			for _, e := range arp {
 				if e.netif == sn.Interface && p.Contains(e.ip) && !own[e.ip.String()] {
 					g.Devices = append(g.Devices, Device{

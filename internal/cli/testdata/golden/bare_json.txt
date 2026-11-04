@@ -89,7 +89,8 @@
           "private_address": true,
           "gateway": false
         }
-      ]
+      ],
+      "self": "192.168.1.50"
     }
   ],
   "dhcp": [

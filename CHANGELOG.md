@@ -4,6 +4,21 @@ All notable changes to snetwork. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and snetwork uses
 [semantic versioning](https://semver.org/).
 
+## [0.1.2] - 2026-11-04
+
+### Fixed
+
+- **A remote subnet shows its sweep and its router.** The router's answer
+  now carries its own address and how many addresses it swept. The header
+  says "N found · swept 254 addresses · asked minix" after a sweep, and
+  "N seen recently · ARP cache" without one. The router has its own row,
+  with its name.
+- **The local sweep no longer clears a remote answer's sweep flag** when it
+  finishes after the answer arrives.
+
+The router must run 0.1.2 too. An older router's answer has no row for the
+router and no count of addresses.
+
 ## [0.1.1] - 2026-11-04
 
 ### Changed

@@ -73,7 +73,16 @@ func Run(ctx context.Context, s netinfo.Snapshot, p Prober, update Update) {
 				s.Active.Sweeps[i].Done = true
 			}
 			for i := range s.Devices {
-				s.Devices[i].Swept = s.Devices[i].Via == "direct"
+				g := &s.Devices[i]
+				if g.Via != "direct" {
+					continue // a remote router's answer says itself whether it swept
+				}
+				g.Swept = true
+				for _, sw := range s.Active.Sweeps {
+					if sw.Prefix == g.Prefix {
+						g.Probed = sw.Probed
+					}
+				}
 			}
 		})
 		names(ctx, p, update)

@@ -92,8 +92,13 @@ type DeviceGroup struct {
 	AskedVia string `json:"asked_via,omitempty"`
 	// Note says why a remote subnet has no answer ("bravo has no snetwork").
 	Note string `json:"note,omitempty"`
-	// Swept is true when --active swept the subnet before counting.
-	Swept bool `json:"swept,omitempty"`
+	// Swept is true when --active swept the subnet before counting, and
+	// Probed is how many addresses the sweep asked.
+	Swept  bool `json:"swept,omitempty"`
+	Probed int  `json:"probed,omitempty"`
+	// Self is the address of the machine that made the count, on this
+	// subnet. A remote router's answer carries its own address.
+	Self string `json:"self,omitempty"`
 	// Pending is true while a remote router is still being asked.
 	Pending bool `json:"pending,omitempty"`
 }

@@ -52,7 +52,8 @@ devices
     10.20.30.110  –             private address  02:00:00:00:00:0f
     10.20.30.120  printer       Xensource        00:16:3e:00:00:10  name from ssh config
 
-  10.40.50.0/24  via vpn · tailscale  3 seen  asked bravo
+  10.40.50.0/24  via vpn · tailscale  3 found  swept 254 addresses · asked bravo
+    10.40.50.2   bravo                                         answered for this subnet
     10.40.50.1   unifi     Ubiquiti         00:16:3e:00:00:51  gateway · name from dns
     10.40.50.57  Pixel-10  private address  02:00:00:00:00:52  name from dns
     10.40.50.88  basecamp  Synology         00:16:3e:00:00:53  name from dns

@@ -111,7 +111,7 @@ func askRouters(env Env, c config, l *live) {
 						d.Note = err.Error()
 						continue
 					}
-					d.Count, d.Devices, d.Swept = got.Count, got.Devices, got.Swept
+					d.Count, d.Devices, d.Swept, d.Probed, d.Self = got.Count, got.Devices, got.Swept, got.Probed, got.Self
 					if d.Count == nil {
 						d.Note = g.Router + " does not sit on " + g.Prefix
 					}
