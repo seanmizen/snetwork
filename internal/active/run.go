@@ -136,10 +136,19 @@ func names(ctx context.Context, p Prober, update Update) {
 			if g.Via != "direct" {
 				continue
 			}
+			// No DNS server from the lease (Tailscale can own resolv.conf,
+			// and some DHCP clients keep none): ask the gateway. It is
+			// most often the router that gave out the addresses.
+			srv := dnsFor[g.Interface]
+			for _, d := range g.Devices {
+				if srv == "" && d.Gateway {
+					srv = d.IP
+				}
+			}
 			for _, d := range g.Devices {
 				ips = append(ips, d.IP)
 				ips = append(ips, d.Also...)
-				if srv := dnsFor[g.Interface]; srv != "" {
+				if srv != "" {
 					servers[srv] = append(servers[srv], d.IP)
 					servers[srv] = append(servers[srv], d.Also...)
 				}

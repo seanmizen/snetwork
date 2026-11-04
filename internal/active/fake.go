@@ -3,6 +3,7 @@ package active
 import (
 	"context"
 	"net/netip"
+	"sync"
 
 	"github.com/seanmizen/snetwork/internal/netinfo"
 )
@@ -12,6 +13,8 @@ import (
 type Fake struct {
 	Neighbours []byte
 	Swept      []netip.Addr
+	DNSAsked   []string // the servers ReverseDNS was given
+	mu         sync.Mutex
 }
 
 func (f *Fake) Sweep(_ context.Context, targets []netip.Addr) error { f.Swept = targets; return nil }
@@ -25,7 +28,10 @@ func (f *Fake) TailscalePing(_ context.Context, peer string) (string, float64, e
 func (f *Fake) Resolve(_ context.Context, server, _ string) (string, float64, error) {
 	return "192.0.2.80", 12, nil
 }
-func (f *Fake) ReverseDNS(_ context.Context, _ string, ips []string) map[string]string {
+func (f *Fake) ReverseDNS(_ context.Context, server string, ips []string) map[string]string {
+	f.mu.Lock()
+	f.DNSAsked = append(f.DNSAsked, server)
+	f.mu.Unlock()
 	return map[string]string{"10.20.30.106": "tv"}
 }
 func (f *Fake) MDNS(context.Context, []string) map[string]string {

@@ -140,3 +140,29 @@ func TestRun(t *testing.T) {
 		t.Error("only the direct subnet is swept")
 	}
 }
+
+// TestNamesAskTheGateway: with no DNS server from the lease (Tailscale owns
+// resolv.conf), the reverse lookups go to the subnet's gateway.
+func TestNamesAskTheGateway(t *testing.T) {
+	s, raw := load(t, "home", "darwin")
+	Plan(&s)
+	for i := range s.DHCP {
+		s.DHCP[i].DNS = nil
+	}
+	gw := ""
+	for _, d := range s.Devices[0].Devices {
+		if d.Gateway {
+			gw = d.IP
+		}
+	}
+	f := &Fake{}
+	var mu sync.Mutex
+	names(context.Background(), f, func(fn func(*netinfo.Snapshot, *netinfo.Raw)) {
+		mu.Lock()
+		defer mu.Unlock()
+		fn(&s, &raw)
+	})
+	if gw == "" || len(f.DNSAsked) != 1 || f.DNSAsked[0] != gw {
+		t.Errorf("asked %v, want the gateway %q", f.DNSAsked, gw)
+	}
+}

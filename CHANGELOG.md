@@ -14,6 +14,13 @@ All notable changes to snetwork. The format follows
   wrong user: ssh then offers every agent key, and the server stops it with
   "Too many authentication failures".
 
+### Fixed
+
+- **`--active` names devices on a router that Tailscale hides.** When the
+  DHCP lease gives no DNS server (Tailscale can own `resolv.conf`), the
+  reverse lookups go to the subnet's gateway. Before, a Linux subnet router
+  found no names from DNS.
+
 ## [0.1.0] - 2026-11-04
 
 First release.
