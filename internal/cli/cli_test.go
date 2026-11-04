@@ -160,8 +160,9 @@ func TestUsageErrors(t *testing.T) {
 
 func TestRemoteErrors(t *testing.T) {
 	for host, want := range map[string]string{
-		"delta": "snetwork: delta has no snetwork\n",
-		"echo":  "snetwork: ssh to echo failed: Permission denied (publickey).\n",
+		"delta":    "snetwork: delta has no snetwork\n",
+		"echo":     "snetwork: ssh to echo as alice failed: Permission denied (publickey). Set the user for echo in ~/.ssh/config: Host echo / User NAME\n",
+		"bob@echo": "snetwork: ssh to bob@echo as bob failed: Permission denied (publickey)\n",
 	} {
 		out, errOut, code := snetwork(t, "home", nil, "--via", host)
 		if code != exitError || out != "" || errOut != want {

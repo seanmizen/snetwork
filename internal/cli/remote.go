@@ -25,9 +25,30 @@ func remote(env Env, host string, args ...string) ([]byte, error) {
 		if strings.Contains(msg, "not found") || strings.Contains(msg, "No such file") {
 			return nil, fmt.Errorf("%s has no snetwork", host)
 		}
-		return nil, fmt.Errorf("ssh to %s failed: %s", host, msg)
+		return nil, fmt.Errorf("%s", sshFailure(env, host, msg))
 	}
 	return out, nil
+}
+
+// sshFailure names the user that ssh logged in as. An authentication
+// failure is most often the wrong user: ssh then offers every agent key, and
+// the server stops it with "Too many authentication failures".
+func sshFailure(env Env, host, msg string) string {
+	as := ""
+	if out, err := env.Run("sshuser-"+host, []string{"ssh", "-G", host}); err == nil {
+		for _, line := range strings.Split(string(out), "\n") {
+			if user, ok := strings.CutPrefix(line, "user "); ok {
+				as = " as " + strings.TrimSpace(user)
+				break
+			}
+		}
+	}
+	text := fmt.Sprintf("ssh to %s%s failed: %s", host, as, strings.TrimSuffix(msg, "."))
+	authFailed := strings.Contains(msg, "Permission denied") || strings.Contains(msg, "Too many authentication failures")
+	if authFailed && !strings.Contains(host, "@") { // USER@HOST names its user already
+		text += fmt.Sprintf(". Set the user for %s in ~/.ssh/config: Host %s / User NAME", host, host)
+	}
+	return text
 }
 
 // viaSnapshot is --via: the whole snapshot comes from another machine, and

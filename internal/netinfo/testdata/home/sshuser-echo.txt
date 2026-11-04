@@ -1,0 +1,3 @@
+user alice
+hostname echo
+port 22

@@ -4,6 +4,16 @@ All notable changes to snetwork. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and snetwork uses
 [semantic versioning](https://semver.org/).
 
+## [0.1.1] - 2026-11-04
+
+### Changed
+
+- **A failed ssh names its user.** When snetwork cannot ask a router, the
+  message says which user ssh logged in as. For an authentication failure,
+  it also says to set the user in `~/.ssh/config`. The usual cause is the
+  wrong user: ssh then offers every agent key, and the server stops it with
+  "Too many authentication failures".
+
 ## [0.1.0] - 2026-11-04
 
 First release.
