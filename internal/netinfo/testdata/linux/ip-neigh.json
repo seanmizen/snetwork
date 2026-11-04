@@ -1,0 +1,5 @@
+[{"dst":"192.168.50.1","dev":"enp1s0","lladdr":"00:16:3e:00:00:65","state":["REACHABLE"]},
+{"dst":"192.168.50.20","dev":"enp1s0","lladdr":"02:00:00:00:00:66","state":["STALE"]},
+{"dst":"192.168.50.30","dev":"enp1s0","state":["FAILED"]},
+{"dst":"192.168.50.1","dev":"wlp2s0","lladdr":"00:16:3e:00:00:65","state":["STALE"]},
+{"dst":"fe80::1","dev":"enp1s0","lladdr":"00:16:3e:00:00:65","router":null,"state":["REACHABLE"]}]

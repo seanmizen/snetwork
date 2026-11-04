@@ -1,0 +1,159 @@
+{
+  "taken": "2026-11-03T21:00:00Z",
+  "os": "darwin",
+  "location": {
+    "kind": "other",
+    "label": "other network",
+    "interface": "en8",
+    "address": "192.168.1.50",
+    "gateway": "192.168.1.1"
+  },
+  "interfaces": [
+    {
+      "name": "lo0",
+      "label": "loopback",
+      "kind": "loopback",
+      "state": "up",
+      "ipv4": [
+        "127.0.0.1/8"
+      ],
+      "mtu": 16384,
+      "default_route": false
+    },
+    {
+      "name": "en0",
+      "label": "Wi-Fi",
+      "kind": "wifi",
+      "state": "no link",
+      "mac": "00:16:3e:00:00:41",
+      "mtu": 1500,
+      "default_route": false,
+      "service_order": 2
+    },
+    {
+      "name": "en8",
+      "label": "USB 10/100/1000 LAN",
+      "kind": "ethernet",
+      "state": "up",
+      "ipv4": [
+        "192.168.1.50/24"
+      ],
+      "mac": "00:16:3e:00:00:42",
+      "mtu": 1500,
+      "default_route": true,
+      "service_order": 1
+    },
+    {
+      "name": "bridge0",
+      "label": "Thunderbolt Bridge",
+      "kind": "bridge",
+      "state": "disabled",
+      "default_route": false,
+      "service_order": 3
+    }
+  ],
+  "default_routes": [
+    {
+      "prefix": "default",
+      "gateway": "192.168.1.1",
+      "interface": "en8",
+      "flags": "UGScg"
+    }
+  ],
+  "subnets": [
+    {
+      "prefix": "192.168.1.0/24",
+      "via": "direct",
+      "interface": "en8"
+    }
+  ],
+  "devices": [
+    {
+      "prefix": "192.168.1.0/24",
+      "via": "direct",
+      "interface": "en8",
+      "count": 2,
+      "devices": [
+        {
+          "ip": "192.168.1.1",
+          "mac": "00:16:3e:00:00:43",
+          "interface": "en8",
+          "private_address": false,
+          "gateway": true,
+          "vendor": "Xensource"
+        },
+        {
+          "ip": "192.168.1.20",
+          "mac": "02:00:00:00:00:44",
+          "interface": "en8",
+          "private_address": true,
+          "gateway": false
+        }
+      ]
+    }
+  ],
+  "dhcp": [
+    {
+      "interface": "en8",
+      "address": "192.168.1.50",
+      "server": "192.168.1.1",
+      "routers": [
+        "192.168.1.1"
+      ],
+      "dns": [
+        "192.168.1.1",
+        "1.1.1.1"
+      ],
+      "domain": "lan.example",
+      "length_ns": 300000000000,
+      "start": "2026-11-03T19:55:00Z",
+      "expires": "2026-11-03T20:00:00Z",
+      "state": "BOUND"
+    }
+  ],
+  "dns": {
+    "general": [
+      {
+        "nameservers": [
+          "192.168.1.1",
+          "1.1.1.1"
+        ],
+        "interface": "en8",
+        "order": 200000
+      }
+    ],
+    "domain": null
+  },
+  "wifi": {
+    "interface": "en0",
+    "power_on": false,
+    "associated": false,
+    "name": ""
+  },
+  "vpn": {
+    "tailscale": {
+      "installed": false,
+      "self": {
+        "name": "",
+        "online": false,
+        "exit_node": false
+      },
+      "peers": null
+    }
+  },
+  "firewall": {
+    "tools": [
+      {
+        "name": "macOS app firewall",
+        "state": "off",
+        "detail": "stealth off"
+      },
+      {
+        "name": "pf",
+        "state": "unknown",
+        "detail": "needs root: sudo pfctl -s info"
+      }
+    ]
+  },
+  "listening": []
+}

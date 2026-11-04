@@ -1,0 +1,74 @@
+{
+  "tailscale": {
+    "installed": true,
+    "state": "Running",
+    "tailnet": "owner@example.com",
+    "magicdns_suffix": "tail0000.ts.net",
+    "self": {
+      "name": "laptop",
+      "os": "macOS",
+      "ips": [
+        "100.64.0.10",
+        "fd7a:115c:a1e0::a"
+      ],
+      "online": true,
+      "relay": "fra",
+      "exit_node": false
+    },
+    "peers": [
+      {
+        "name": "alpha",
+        "os": "linux",
+        "ips": [
+          "100.64.0.11",
+          "fd7a:115c:a1e0::a"
+        ],
+        "online": true,
+        "routes": [
+          "10.20.30.0/24"
+        ],
+        "direct": "10.20.30.108:41641",
+        "relay": "fra",
+        "exit_node": false
+      },
+      {
+        "name": "bravo",
+        "os": "linux",
+        "ips": [
+          "100.64.0.12",
+          "fd7a:115c:a1e0::a"
+        ],
+        "online": true,
+        "routes": [
+          "10.40.50.0/24"
+        ],
+        "relay": "fra",
+        "exit_node": false
+      },
+      {
+        "name": "phone",
+        "os": "iOS",
+        "ips": [
+          "100.64.0.13",
+          "fd7a:115c:a1e0::a"
+        ],
+        "online": false,
+        "relay": "ams",
+        "exit_node": false,
+        "last_seen": "2026-11-03T17:16:32.1Z"
+      }
+    ]
+  },
+  "others": [
+    {
+      "name": "Example WireGuard®",
+      "state": "Disconnected",
+      "enabled": true
+    },
+    {
+      "name": "Example WireGuard",
+      "state": "Disconnected",
+      "enabled": true
+    }
+  ]
+}

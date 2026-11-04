@@ -1,5 +1,6 @@
 {
   "taken": "2026-11-03T21:00:00Z",
+  "os": "darwin",
   "location": {
     "kind": "lan",
     "label": "LAN of alpha",
@@ -170,14 +171,17 @@
       "via": "direct",
       "interface": "en0",
       "router": "alpha",
-      "count": 11,
+      "count": 10,
       "devices": [
         {
           "ip": "10.20.30.1",
           "mac": "00:16:3e:00:00:06",
           "interface": "en0",
           "private_address": false,
-          "gateway": true
+          "gateway": true,
+          "vendor": "Xensource",
+          "name": "gw",
+          "name_source": "ssh config"
         },
         {
           "ip": "10.20.30.100",
@@ -191,14 +195,21 @@
           "mac": "00:16:3e:00:00:08",
           "interface": "en0",
           "private_address": false,
-          "gateway": false
+          "gateway": false,
+          "vendor": "Xensource"
         },
         {
           "ip": "10.20.30.103",
           "mac": "00:16:3e:00:00:09",
           "interface": "en0",
           "private_address": false,
-          "gateway": false
+          "gateway": false,
+          "vendor": "Xensource",
+          "name": "alpha",
+          "name_source": "known_hosts",
+          "also": [
+            "10.20.30.108"
+          ]
         },
         {
           "ip": "10.20.30.105",
@@ -212,21 +223,16 @@
           "mac": "00:16:3e:00:00:0b",
           "interface": "en0",
           "private_address": false,
-          "gateway": false
+          "gateway": false,
+          "vendor": "Xensource"
         },
         {
           "ip": "10.20.30.107",
           "mac": "00:16:3e:00:00:0c",
           "interface": "en0",
           "private_address": false,
-          "gateway": false
-        },
-        {
-          "ip": "10.20.30.108",
-          "mac": "00:16:3e:00:00:0d",
-          "interface": "en0",
-          "private_address": false,
-          "gateway": false
+          "gateway": false,
+          "vendor": "Xensource"
         },
         {
           "ip": "10.20.30.109",
@@ -247,7 +253,10 @@
           "mac": "00:16:3e:00:00:10",
           "interface": "en0",
           "private_address": false,
-          "gateway": false
+          "gateway": false,
+          "vendor": "Xensource",
+          "name": "printer",
+          "name_source": "ssh config"
         }
       ]
     },
@@ -436,9 +445,18 @@
     ]
   },
   "firewall": {
-    "application_firewall": "on",
-    "stealth_mode": "off",
-    "pf": "unknown without sudo"
+    "tools": [
+      {
+        "name": "macOS app firewall",
+        "state": "on",
+        "detail": "stealth off"
+      },
+      {
+        "name": "pf",
+        "state": "unknown",
+        "detail": "needs root: sudo pfctl -s info"
+      }
+    ]
   },
   "listening": [
     {

@@ -1,0 +1,7 @@
+ip_address='192.168.50.10'
+subnet_cidr='24'
+routers='192.168.50.1'
+domain_name_servers='192.168.50.1 1.1.1.1'
+domain_name='lan'
+dhcp_lease_time='7200'
+dhcp_server_identifier='192.168.50.1'

@@ -140,13 +140,13 @@ func TestParseVPNServicesAndFirewall(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v", got)
 	}
-	for _, c := range []struct{ global, stealth, app, st string }{
-		{"Firewall is enabled. (State = 1)", "Firewall stealth mode is on", "on", "on"},
-		{"Firewall is disabled. (State = 0)", "Firewall stealth mode is off", "off", "off"},
-		{"Firewall is blocking all non-essential incoming connections. (State = 2)", "", "block all", "unknown"},
+	for _, c := range []struct{ global, stealth, app, detail string }{
+		{"Firewall is enabled. (State = 1)", "Firewall stealth mode is on", "on", "stealth on"},
+		{"Firewall is disabled. (State = 0)", "Firewall stealth mode is off", "off", "stealth off"},
+		{"Firewall is blocking all non-essential incoming connections. (State = 2)", "", "block all", ""},
 	} {
 		fw := parseFirewall(c.global, c.stealth)
-		if fw.App != c.app || fw.Stealth != c.st {
+		if len(fw.Tools) != 2 || fw.Tools[0].State != c.app || fw.Tools[0].Detail != c.detail || fw.Tools[1].Name != "pf" {
 			t.Errorf("%q: got %+v", c.global, fw)
 		}
 	}

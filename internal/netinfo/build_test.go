@@ -17,7 +17,11 @@ var now = time.Date(2026, 11, 3, 21, 0, 0, 0, time.UTC)
 func scenario(t *testing.T, name string) netinfo.Snapshot {
 	t.Helper()
 	dir := filepath.Join("testdata", name)
-	return netinfo.Build(collect.Collect(fixture.Runner(dir), fixture.WiFi(dir)), now)
+	goos := "darwin"
+	if name == "linux" {
+		goos = "linux"
+	}
+	return netinfo.Build(collect.Collect(goos, fixture.Runner(dir), fixture.WiFi(dir)), now)
 }
 
 func TestHome(t *testing.T) {
@@ -69,7 +73,7 @@ func TestHome(t *testing.T) {
 	if s.VPN.AllTrafficVia != "" || len(s.VPN.Others) != 2 || s.VPN.Tailscale.State != "Running" {
 		t.Errorf("vpn = %+v", s.VPN)
 	}
-	if s.Firewall.App != "on" || s.Firewall.Stealth != "off" {
+	if fw := s.Firewall.Tools[0]; fw.State != "on" || fw.Detail != "stealth off" {
 		t.Errorf("firewall = %+v", s.Firewall)
 	}
 }
@@ -94,8 +98,8 @@ func TestHotspotWithFullTunnel(t *testing.T) {
 	if !reflect.DeepEqual(via, want) {
 		t.Errorf("subnets = %v", via)
 	}
-	if s.Firewall.Stealth != "on" {
-		t.Errorf("stealth = %q", s.Firewall.Stealth)
+	if s.Firewall.Tools[0].Detail != "stealth on" {
+		t.Errorf("firewall = %+v", s.Firewall)
 	}
 	if len(s.Listening) != 1 || s.Listening[0].Port != 22 || s.Listening[0].Family != "both" {
 		t.Errorf("listening = %+v", s.Listening)
@@ -142,7 +146,7 @@ func TestProblemIsReported(t *testing.T) {
 		}
 		return fixture.Runner(dir)(key, argv)
 	}
-	s := netinfo.Build(collect.Collect(failing, fixture.WiFi(dir)), now)
+	s := netinfo.Build(collect.Collect("darwin", failing, fixture.WiFi(dir)), now)
 	if !reflect.DeepEqual(s.Problems, []string{"dns: boom"}) || len(s.DNS.General) != 0 {
 		t.Errorf("problems = %v, dns = %+v", s.Problems, s.DNS)
 	}

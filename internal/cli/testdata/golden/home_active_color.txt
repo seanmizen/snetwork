@@ -1,0 +1,45 @@
+[1msnetwork[0m[2m · [0mLAN of alpha[2m · [0m10.20.30.102 on Wi-Fi[2m · [0mtailnet up
+
+[1;33minterfaces[0m                                        [2msnetwork interfaces[0m
+  [36men0[0m    Wi-Fi                10.20.30.102/24  [32mup[0m              ← default route
+  [36mutun7[0m  Tailscale            100.64.0.10      [32mup[0m
+  [36men8[0m    USB 10/100/1000 LAN  –                [2mnot plugged in[0m
+  [2m+ 9 more[0m
+
+[1;33msubnets[0m                                           [2msnetwork subnets[0m
+  [36m10.20.30.0/24[0m  direct   en0                [32mgateway 3.2 ms[0m  [2malpha routes it when you are away[0m
+  [36m10.40.50.0/24[0m  via vpn  tailscale → bravo  [32mbravo 40 ms[0m
+  [36m100.64.0.0/10[0m  via vpn  tailscale                          [2mtailnet · 2 of 3 peers online[0m
+
+[1;33mdevices[0m                                           [2msnetwork devices[0m
+  [36m10.20.30.0/24[0m  10 found  [2mswept 254 addresses[0m
+  [36m10.40.50.0/24[0m  –         [2mbehind bravo · snetwork devices 10.40.50.0/24 asks it[0m
+
+[1;33mdhcp[0m                                              [2msnetwork dhcp[0m
+  [36men0[0m   from 10.20.30.1[2m · [0m24h lease[2m · [0m21h 20m left
+        router + dns 10.20.30.1 [2m(same box)[0m
+
+[1;33mdns[0m                                               [2msnetwork dns[0m
+  [2m1[0m  [36m100.100.100.100[0m  tailscale MagicDNS  [32m12 ms[0m  [2msearch tail0000.ts.net[0m
+  [2m2[0m  [36m10.20.30.1[0m       router, from DHCP   [32m12 ms[0m
+
+[1;33mwifi[0m                                              [2msnetwork wifi[0m
+  [2mname hidden by macOS[0m[2m · [0m5 GHz ch 112[2m · [0m80 MHz[2m · [0m-59 dBm[2m · [0m117 Mb/s
+  nearby  9 networks · 1 on channel 112 · strongest -40 dBm
+
+[1;33mvpn[0m                                               [2msnetwork vpn[0m
+  tailscale  [32mconnected[0m[2m · [0malpha [32m✓[0m 40 ms  bravo [32m✓[0m 40 ms  phone [31m✗[0m[2m · [0mno exit node
+  others     Example WireGuard® off[2m · [0mExample WireGuard off
+
+[1;33minternet[0m                                          [2msnetwork internet[0m
+  [2mpublic ipv4[0m  192.0.2.1
+  [2mpublic ipv6[0m  [2mnone: no IPv6 route out[0m
+  [2mcgnat[0m        [33myes (hop 2: 100.64.1.1): no inbound IPv4[0m
+  [2mlatency[0m      21 ms to 1.1.1.1
+
+[1;33mfirewall[0m                                          [2msnetwork firewall[0m
+  macOS app firewall  [32mon[0m       [2mstealth off[0m
+  pf                  [2munknown[0m  [2mneeds root[0m
+
+[1;33mlistening[0m                                         [2msnetwork listening[0m
+  open  12 ports beyond loopback: 4100 bun, 5000 ControlCenter, 33894 IPNExtension, 34022 IPNExtension, 49425 Python, …

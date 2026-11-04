@@ -12,7 +12,7 @@ import (
 
 // Sections are the section names, in display order. `snetwork <name>`
 // shows one in full; `snetwork all` shows every one.
-var Sections = []string{"interfaces", "subnets", "devices", "dhcp", "dns", "wifi", "vpn", "firewall", "listening"}
+var Sections = []string{"interfaces", "subnets", "devices", "dhcp", "dns", "wifi", "vpn", "internet", "firewall", "listening"}
 
 // summaryInterfaces is how many interfaces the summary shows.
 const summaryInterfaces = 3
@@ -38,42 +38,6 @@ func Headline(s netinfo.Snapshot, st Style) string {
 	return strings.Join(parts, st.paint(roleHint, " · ")) + "\n"
 }
 
-// Summary is plain `snetwork`: every section, a few lines each.
-func Summary(s netinfo.Snapshot, st Style) string {
-	var b strings.Builder
-	b.WriteString(Headline(s, st))
-	for _, name := range Sections {
-		b.WriteString("\n")
-		b.WriteString(st.heading(name, "snetwork "+name))
-		b.WriteString(summaryBody(name, s, st))
-	}
-	b.WriteString(problems(s, st))
-	return b.String()
-}
-
-// All is `snetwork all`: every section in full.
-func All(s netinfo.Snapshot, st Style) string {
-	var b strings.Builder
-	b.WriteString(Headline(s, st))
-	for _, name := range Sections {
-		body, _ := fullBody(name, s, "", st)
-		b.WriteString("\n")
-		b.WriteString(st.heading(name, ""))
-		b.WriteString(body)
-	}
-	b.WriteString(problems(s, st))
-	return b.String()
-}
-
-// Section is `snetwork <name> [item]`: one section in full.
-func Section(name, item string, s netinfo.Snapshot, st Style) (string, error) {
-	body, err := fullBody(name, s, item, st)
-	if err != nil {
-		return "", err
-	}
-	return st.heading(name, "") + body + problems(s, st), nil
-}
-
 func problems(s netinfo.Snapshot, st Style) string {
 	if len(s.Problems) == 0 {
 		return ""
@@ -81,66 +45,11 @@ func problems(s netinfo.Snapshot, st Style) string {
 	return "\n" + st.paint(roleWarn, "could not read: "+strings.Join(s.Problems, "; ")) + "\n"
 }
 
-func summaryBody(name string, s netinfo.Snapshot, st Style) string {
-	switch name {
-	case "interfaces":
-		return interfacesSummary(s, st)
-	case "subnets":
-		return subnetsTable(s, st)
-	case "devices":
-		return devicesSummary(s, st)
-	case "dhcp":
-		return dhcpBody(s, "", false, st)
-	case "dns":
-		return dnsSummary(s, st)
-	case "wifi":
-		return wifiSummary(s, st)
-	case "vpn":
-		return vpnSummary(s, st)
-	case "firewall":
-		return firewallBody(s, false, st)
-	case "listening":
-		return listeningSummary(s, st)
-	}
-	return ""
-}
-
 // ItemError is a section item that does not exist, or a section that takes
 // no item.
 type ItemError struct{ msg string }
 
 func (e ItemError) Error() string { return e.msg }
-
-func fullBody(name string, s netinfo.Snapshot, item string, st Style) (string, error) {
-	takesItem := map[string]bool{"interfaces": true, "devices": true, "dhcp": true, "vpn": true}
-	if item != "" && !takesItem[name] {
-		return "", ItemError{fmt.Sprintf("%s takes no item (got %q)", name, item)}
-	}
-	switch name {
-	case "interfaces":
-		return interfacesFull(s, item, st)
-	case "subnets":
-		return subnetsTable(s, st) + defaultsBody(s, st), nil
-	case "devices":
-		return devicesFull(s, item, st)
-	case "dhcp":
-		if item != "" && !hasLease(s, item) {
-			return "", ItemError{fmt.Sprintf("no DHCP lease on %q", item)}
-		}
-		return dhcpBody(s, item, true, st), nil
-	case "dns":
-		return dnsFull(s, st), nil
-	case "wifi":
-		return wifiFull(s, st), nil
-	case "vpn":
-		return vpnFull(s, item, st)
-	case "firewall":
-		return firewallBody(s, true, st), nil
-	case "listening":
-		return listeningFull(s, st), nil
-	}
-	return "", ItemError{fmt.Sprintf("no section %q (sections: %s)", name, strings.Join(Sections, ", "))}
-}
 
 /* ---------- interfaces ---------- */
 
@@ -152,10 +61,10 @@ func rankInterfaces(list []netinfo.Interface) []netinfo.Interface {
 		switch {
 		case i.Default:
 			return 0
-		case len(i.IPv4) > 0 && i.Kind != "loopback" && i.Kind != "tunnel":
+		case len(i.IPv4) > 0 && (i.Kind == "wifi" || i.Kind == "ethernet" || i.Kind == "iphone"):
 			return 1
-		case len(i.IPv4) > 0 && i.Kind == "tunnel":
-			return 2
+		case len(i.IPv4) > 0 && i.Kind != "loopback":
+			return 2 // tunnels, bridges, other
 		case i.Order > 0:
 			return 3
 		case i.Kind == "loopback":
@@ -301,14 +210,21 @@ func subnetsTable(s netinfo.Snapshot, st Style) string {
 		if sn.Via == "vpn" {
 			via = "via vpn"
 		}
-		spec := ""
+		spec := roleHint
 		if sn.Note == "all traffic" {
 			spec = roleWarn
 		}
-		rows = append(rows, []cell{cs(roleName, sn.Prefix), c(via), c(path), cs(orHint(spec), note)})
+		row := []cell{cs(roleName, sn.Prefix), c(via), c(path)}
+		if s.Active != nil {
+			row = append(row, reach(s, sn, st))
+		}
+		rows = append(rows, append(row, cs(spec, note)))
 	}
 	return st.table("  ", rows)
 }
+
+// reach is the --active column of subnets: the gateway's ping for a direct
+// subnet, the router's tailscale ping for one behind the tailnet.
 
 func orHint(spec string) string {
 	if spec == "" {
@@ -344,18 +260,16 @@ func devicesSummary(s netinfo.Snapshot, st Style) string {
 	}
 	var rows [][]cell
 	for _, g := range s.Devices {
-		if g.Count == nil {
-			rows = append(rows, []cell{cs(roleName, g.Prefix), c("–"), cs(roleHint, behind(g))})
-			continue
-		}
-		rows = append(rows, []cell{cs(roleName, g.Prefix), cf("", "%d seen recently", *g.Count), cs(roleHint, "ARP cache, no scan")})
+		rows = append(rows, append([]cell{cs(roleName, g.Prefix)}, groupStatus(s, g, st)...))
 	}
 	return st.table("  ", rows)
 }
 
+// groupStatus is the count and how it was found, or why there is none.
+
 func behind(g netinfo.DeviceGroup) string {
 	if g.Router != "" {
-		return "behind " + g.Router + ": not visible from here"
+		return "behind " + g.Router
 	}
 	return "behind a VPN: not visible from here"
 }
@@ -363,35 +277,58 @@ func behind(g netinfo.DeviceGroup) string {
 func devicesFull(s netinfo.Snapshot, item string, st Style) (string, error) {
 	var b strings.Builder
 	found := false
-	for gi, g := range s.Devices {
+	for _, g := range s.Devices {
 		if item != "" && g.Prefix != item {
 			continue
 		}
-		found = true
-		if gi > 0 && item == "" {
+		if found {
 			b.WriteString("\n")
 		}
-		if g.Count == nil {
-			b.WriteString(st.table("  ", [][]cell{{cs(roleName, g.Prefix), c("via vpn · " + strings.ToLower(ifaceLabel(s, g.Interface))), cs(roleHint, behind(g))}}))
+		found = true
+		where := "direct · " + g.Interface
+		if g.Via != "direct" {
+			where = "via vpn · " + strings.ToLower(ifaceLabel(s, g.Interface))
+		}
+		head := append([]cell{cs(roleName, g.Prefix), c(where)}, groupStatus(s, g, st)...)
+		b.WriteString(st.table("  ", [][]cell{head}))
+		if g.Count == nil || g.Pending {
 			continue
 		}
-		head := fmt.Sprintf("direct · %s · %d seen recently", g.Interface, *g.Count)
-		b.WriteString(st.table("  ", [][]cell{{cs(roleName, g.Prefix), c(head), cs(roleHint, "ARP cache, no scan")}}))
 		var rows [][]cell
+		var also [][]string // per row, extra addresses
 		if self := selfAddr(s, g); self != "" {
-			rows = append(rows, []cell{c(self), cs(roleHint, "this machine"), c("")})
+			rows = append(rows, []cell{c(self), cs(roleHint, "this machine"), c(""), c(""), c("")})
+			also = append(also, nil)
 		}
+		naming := s.Active != nil && s.Active.Names != nil && !s.Active.Names.Done && g.AskedVia == ""
 		for _, d := range g.Devices {
+			name := cs(roleName, d.Name)
+			switch {
+			case d.Name == "" && naming:
+				name = st.wait()
+			case d.Name == "":
+				name = cs(roleHint, "–")
+			}
+			maker := d.Vendor
+			if d.Private {
+				maker = "private address"
+			}
 			var notes []string
 			if d.Gateway {
 				notes = append(notes, "gateway")
 			}
-			if d.Private {
-				notes = append(notes, "private address")
+			if d.NameSource != "" {
+				notes = append(notes, "name from "+d.NameSource)
 			}
-			rows = append(rows, []cell{c(d.IP), c(d.MAC), cs(roleHint, strings.Join(notes, " · "))})
+			rows = append(rows, []cell{c(d.IP), name, cs(roleHint, maker), cs(roleHint, d.MAC), cs(roleHint, strings.Join(notes, " · "))})
+			also = append(also, d.Also)
 		}
-		b.WriteString(st.table("    ", rows))
+		for i, line := range st.tableLines("    ", rows) {
+			b.WriteString(line + "\n")
+			for _, ip := range also[i] {
+				b.WriteString("      " + st.paint(roleHint, "└ also ") + ip + "\n")
+			}
+		}
 	}
 	if !found {
 		return "", ItemError{fmt.Sprintf("no subnet %q (try one from snetwork subnets)", item)}
@@ -458,6 +395,8 @@ func dhcpBody(s netinfo.Snapshot, item string, full bool, st Style) string {
 		indent := "  " + strings.Repeat(" ", len(l.Interface)) + pad
 		router, dns := strings.Join(l.Routers, ", "), strings.Join(l.DNS, ", ")
 		switch {
+		case router == "" && dns == "":
+			// dhcpcd's lease file was not readable: only the time left is known
 		case router != "" && router == dns:
 			b.WriteString(indent + "router + dns " + router + " " + st.paint(roleHint, "(same box)") + "\n")
 		default:
@@ -507,6 +446,8 @@ func nameserverLabel(s netinfo.Snapshot, ns string) string {
 	switch {
 	case ns == "100.100.100.100" || strings.HasPrefix(ns, "fd7a:115c:a1e0::53"):
 		return "tailscale MagicDNS"
+	case ns == "127.0.0.53":
+		return "systemd-resolved (local stub)"
 	case strings.HasPrefix(ns, "fe80:"):
 		return "router (IPv6 link-local)"
 	}
@@ -550,10 +491,16 @@ func dnsSummary(s netinfo.Snapshot, st Style) string {
 		if len(r.Search) > 0 {
 			search = "search " + strings.Join(r.Search, " ")
 		}
-		rows = append(rows, []cell{cf(roleHint, "%d", i+1), cs(roleName, ns), c(nameserverLabel(s, ns)), cs(roleHint, search)})
+		row := []cell{cf(roleHint, "%d", i+1), cs(roleName, ns), c(nameserverLabel(s, ns))}
+		if s.Active != nil {
+			row = append(row, dnsTiming(s, r.Nameservers, st))
+		}
+		rows = append(rows, append(row, cs(roleHint, search)))
 	}
 	return st.table("  ", rows)
 }
+
+// dnsTiming is the --active column of dns: how fast the resolver answered.
 
 func dnsFull(s netinfo.Snapshot, st Style) string {
 	var b strings.Builder
@@ -565,7 +512,11 @@ func dnsFull(s netinfo.Snapshot, st Style) string {
 			if j == 0 {
 				n = fmt.Sprintf("%d", i+1)
 			}
-			rows = append(rows, []cell{cs(roleHint, n), cs(roleName, ns), c(nameserverLabel(s, ns))})
+			row := []cell{cs(roleHint, n), cs(roleName, ns), c(nameserverLabel(s, ns))}
+			if s.Active != nil {
+				row = append(row, dnsTiming(s, []string{ns}, st))
+			}
+			rows = append(rows, row)
 		}
 		b.WriteString(st.table("    ", rows))
 		var notes []string
@@ -581,6 +532,9 @@ func dnsFull(s netinfo.Snapshot, st Style) string {
 		if len(notes) > 0 {
 			b.WriteString("       " + st.paint(roleHint, strings.Join(notes, " · ")) + "\n")
 		}
+	}
+	if s.Active != nil {
+		b.WriteString("    " + st.paint(roleHint, "timings: one lookup of example.com each") + "\n")
 	}
 	var rows [][]cell
 	var mdns []string
@@ -652,8 +606,14 @@ func wifiSummary(s netinfo.Snapshot, st Style) string {
 	if s.WiFi.Name == "" {
 		parts[0] = st.paint(roleHint, parts[0])
 	}
-	return "  " + strings.Join(parts, st.paint(roleHint, " · ")) + "\n"
+	out := "  " + strings.Join(parts, st.paint(roleHint, " · ")) + "\n"
+	if s.Active != nil && s.Active.WiFiScan != nil {
+		out += "  " + scanText(s, st) + "\n"
+	}
+	return out
 }
+
+// scanText is the --active line of wifi: who else is in range.
 
 func wifiFull(s netinfo.Snapshot, st Style) string {
 	if msg, ok := wifiState(s); !ok {
@@ -661,24 +621,41 @@ func wifiFull(s netinfo.Snapshot, st Style) string {
 	}
 	w := s.WiFi
 	name := c(wifiName(w))
+	if w.NameSource != "" {
+		name = c(w.Name + "  (from the " + w.NameSource + ")")
+	}
 	if w.Name == "" {
-		name = cs(roleHint, wifiName(w)+" (grant Location to your terminal to see it)")
+		name = cs(roleHint, wifiName(w))
 	}
 	rows := [][]cell{
 		{cs(roleHint, "network"), name},
 		{cs(roleHint, "interface"), c(w.Interface)},
-		{cs(roleHint, "channel"), cf("", "%d · %s · %s", w.Channel, w.Band, w.Width)},
+		{cs(roleHint, "channel"), c(strings.Join(nonEmpty(fmt.Sprint(w.Channel), w.Band, w.Width), " · "))},
 		{cs(roleHint, "signal"), cf("", "%d dBm", w.RSSI)},
-		{cs(roleHint, "noise"), cf("", "%d dBm", w.Noise)},
-		{cs(roleHint, "snr"), cf("", "%d dB", w.RSSI-w.Noise)},
-		{cs(roleHint, "rate"), cf("", "%g Mb/s", w.RateMbps)},
-		{cs(roleHint, "standard"), c(dash(w.PHY))},
-		{cs(roleHint, "security"), c(dash(w.Security))},
+	}
+	if w.Noise != 0 {
+		rows = append(rows,
+			[]cell{cs(roleHint, "noise"), cf("", "%d dBm", w.Noise)},
+			[]cell{cs(roleHint, "snr"), cf("", "%d dB", w.RSSI-w.Noise)})
+	}
+	rows = append(rows,
+		[]cell{cs(roleHint, "rate"), cf("", "%g Mb/s", w.RateMbps)},
+		[]cell{cs(roleHint, "standard"), c(dash(w.PHY))},
+	)
+	if w.Security != "" {
+		rows = append(rows, []cell{cs(roleHint, "security"), c(w.Security)})
 	}
 	if w.Country != "" {
 		rows = append(rows, []cell{cs(roleHint, "country"), c(w.Country)})
 	}
-	return st.table("  ", rows)
+	out := st.table("  ", rows)
+	if s.Active != nil && s.Active.WiFiScan != nil {
+		out += "  " + scanText(s, st) + "\n"
+	}
+	if w.Name == "" && s.OS == "darwin" {
+		out += "  " + st.paint(roleHint, `to show the name: make a Shortcut called "Wi-Fi name" (Get Network Details → Network Name)`) + "\n"
+	}
+	return out
 }
 
 /* ---------- vpn ---------- */
@@ -720,10 +697,19 @@ func vpnSummary(s netinfo.Snapshot, st Style) string {
 			if !p.Online {
 				m = st.paint(roleBad, "✗")
 			}
-			peers = append(peers, p.Name+" "+m)
+			txt := p.Name + " " + m
+			if pp := peerPing(s, p.Name); pp != nil {
+				switch {
+				case !pp.Done:
+					txt += " " + st.paint(roleWait, pendingText)
+				case pp.Err == "":
+					txt += " " + ms(pp.RTTms)
+				}
+			}
+			peers = append(peers, txt)
 		}
 		if len(peers) > 0 {
-			parts = append(parts, strings.Join(peers, " "))
+			parts = append(parts, strings.Join(peers, "  "))
 		}
 		if ts.ExitNode != "" {
 			parts = append(parts, "exit node "+ts.ExitNode)
@@ -731,24 +717,18 @@ func vpnSummary(s netinfo.Snapshot, st Style) string {
 			parts = append(parts, "no exit node")
 		}
 	}
-	rows := [][]cell{{c("tailscale"), c(strings.Join(parts, st.paint(roleHint, " · ")))}}
+	lines := []string{"  tailscale  " + strings.Join(parts, st.paint(roleHint, " · "))}
 	if len(s.VPN.Others) > 0 {
 		var o []string
 		for _, v := range s.VPN.Others {
 			o = append(o, v.Name+" "+otherState(v))
 		}
-		rows = append(rows, []cell{c("others"), c(strings.Join(o, st.paint(roleHint, " · ")))})
+		lines = append(lines, "  others     "+strings.Join(o, st.paint(roleHint, " · ")))
 	}
 	if s.VPN.AllTrafficVia != "" {
-		rows = append(rows, []cell{c("tunnel"), cs(roleWarn, s.VPN.AllTrafficVia+" takes all traffic, and is not in System Settings")})
+		lines = append(lines, "  tunnel     "+st.paint(roleWarn, s.VPN.AllTrafficVia+" takes all traffic, and is not in System Settings"))
 	}
-	// the cells hold colour already, so table must not count it: paint
-	// after alignment by building lines by hand
-	var b strings.Builder
-	for _, r := range rows {
-		b.WriteString("  " + fmt.Sprintf("%-11s", r[0].text) + st.paint(r[1].spec, r[1].text) + "\n")
-	}
-	return b.String()
+	return strings.Join(lines, "\n") + "\n"
 }
 
 func vpnFull(s netinfo.Snapshot, item string, st Style) (string, error) {
@@ -803,7 +783,21 @@ func vpnFull(s netinfo.Snapshot, item string, st Style) (string, error) {
 			if len(p.Routes) > 0 {
 				routes = "routes " + strings.Join(p.Routes, ", ")
 			}
-			prow = append(prow, []cell{cs(roleName, p.Name), c(p.OS), online, c(routes), cs(roleHint, path)})
+			row := []cell{cs(roleName, p.Name), c(p.OS), online, c(routes)}
+			if pp := peerPing(s, p.Name); pp != nil {
+				switch {
+				case !pp.Done:
+					row = append(row, st.wait())
+				case pp.Err != "":
+					row = append(row, cs(roleBad, pp.Err))
+				default:
+					row = append(row, cs(roleOK, ms(pp.RTTms)+" "+pp.Path))
+				}
+				path = "" // the ping shows the live path
+			} else if s.Active != nil {
+				row = append(row, c(""))
+			}
+			prow = append(prow, append(row, cs(roleHint, path)))
 		}
 		if item != "" && !found {
 			return "", ItemError{fmt.Sprintf("no tailnet peer %q", item)}
@@ -836,6 +830,8 @@ func vpnFull(s netinfo.Snapshot, item string, st Style) (string, error) {
 	return b.String(), nil
 }
 
+// internetBody is the active-only internet section.
+
 // lastSeen turns Tailscale's RFC 3339 time into "last seen 1h 5m ago".
 func lastSeen(t string, now time.Time) string {
 	ts, err := time.Parse(time.RFC3339Nano, t)
@@ -848,25 +844,25 @@ func lastSeen(t string, now time.Time) string {
 /* ---------- firewall ---------- */
 
 func firewallBody(s netinfo.Snapshot, full bool, st Style) string {
-	fw := s.Firewall
-	app := fw.App
-	switch fw.Stealth {
-	case "on", "off":
-		app += " · stealth " + fw.Stealth
+	if len(s.Firewall.Tools) == 0 {
+		return "  " + st.paint(roleHint, "nothing read") + "\n"
 	}
-	spec := roleOK
-	if fw.App != "on" && fw.App != "block all" {
-		spec = roleWarn
+	var rows [][]cell
+	for _, t := range s.Firewall.Tools {
+		spec := roleHint
+		switch t.State {
+		case "on", "active", "block all":
+			spec = roleOK
+		case "off", "inactive":
+			spec = roleWarn
+		}
+		detail := t.Detail
+		if !full && strings.HasPrefix(detail, "needs root") {
+			detail = "needs root"
+		}
+		rows = append(rows, []cell{c(t.Name), cs(spec, t.State), cs(roleHint, detail)})
 	}
-	rows := [][]cell{
-		{c("macOS app firewall"), cs(spec, app)},
-		{c("pf"), cs(roleHint, fw.PF)},
-	}
-	out := st.table("  ", rows)
-	if full {
-		out += "  " + st.paint(roleHint, "pf needs root to read: sudo pfctl -s info") + "\n"
-	}
-	return out
+	return st.table("  ", rows)
 }
 
 /* ---------- listening ---------- */
@@ -890,7 +886,7 @@ func listeningSummary(s netinfo.Snapshot, st Style) string {
 	if len(s.Listening) == 1 {
 		noun = "port"
 	}
-	return fmt.Sprintf("  %d %s reachable beyond loopback: %s\n", len(s.Listening), noun, strings.Join(names, ", "))
+	return fmt.Sprintf("  open  %d %s beyond loopback: %s\n", len(s.Listening), noun, strings.Join(names, ", "))
 }
 
 func listeningFull(s netinfo.Snapshot, st Style) string {
@@ -910,4 +906,168 @@ func listeningFull(s netinfo.Snapshot, st Style) string {
 		rows = append(rows, []cell{cf(roleName, "%d", l.Port), c(on), c(l.Family), c(proc)})
 	}
 	return st.table("  ", rows)
+}
+
+func reach(s netinfo.Snapshot, sn netinfo.Subnet, st Style) cell {
+	a := s.Active
+	if sn.Via == "direct" {
+		for _, g := range a.Gateways {
+			if g.Interface == sn.Interface {
+				switch {
+				case !g.Done:
+					return st.wait()
+				case g.Err != "":
+					return cs(roleBad, "gateway: "+g.Err)
+				}
+				return cs(roleOK, "gateway "+ms(g.RTTms))
+			}
+		}
+		return c("")
+	}
+	for _, p := range a.Peers {
+		if p.Peer == sn.Router {
+			switch {
+			case !p.Done:
+				return st.wait()
+			case p.Err != "":
+				return cs(roleBad, sn.Router+": "+p.Err)
+			}
+			return cs(roleOK, sn.Router+" "+ms(p.RTTms))
+		}
+	}
+	return c("")
+}
+
+func groupStatus(s netinfo.Snapshot, g netinfo.DeviceGroup, st Style) []cell {
+	switch {
+	case g.Pending:
+		return []cell{st.wait(), cs(roleWait, "asking "+g.AskedVia)}
+	case g.Count == nil && g.Note != "":
+		return []cell{c("–"), cs(roleWarn, g.Note)}
+	case g.Count == nil:
+		hint := behind(g)
+		if g.Router != "" {
+			hint += " · snetwork devices " + g.Prefix + " asks it"
+		}
+		return []cell{c("–"), cs(roleHint, hint)}
+	case g.AskedVia != "":
+		return []cell{cf("", "%d seen", *g.Count), cs(roleHint, "asked "+g.AskedVia)}
+	}
+	if sw := sweepOf(s, g.Prefix); sw != nil {
+		switch {
+		case !sw.Done:
+			return []cell{st.wait(), cs(roleWait, fmt.Sprintf("sweeping %d addresses", sw.Probed))}
+		case sw.Skipped != "":
+			return []cell{cf("", "%d seen recently", *g.Count), cs(roleHint, "not swept: "+sw.Skipped)}
+		}
+		return []cell{cf("", "%d found", *g.Count), cs(roleHint, fmt.Sprintf("swept %d addresses", sw.Probed))}
+	}
+	return []cell{cf("", "%d seen recently", *g.Count), cs(roleHint, "ARP cache, no scan")}
+}
+
+func sweepOf(s netinfo.Snapshot, prefix string) *netinfo.Sweep {
+	if s.Active == nil {
+		return nil
+	}
+	for i := range s.Active.Sweeps {
+		if s.Active.Sweeps[i].Prefix == prefix {
+			return &s.Active.Sweeps[i]
+		}
+	}
+	return nil
+}
+
+func dnsTiming(s netinfo.Snapshot, servers []string, st Style) cell {
+	for _, d := range s.Active.DNS {
+		for _, ns := range servers {
+			if d.Server != ns {
+				continue
+			}
+			switch {
+			case !d.Done:
+				return st.wait()
+			case d.Err != "":
+				return cs(roleBad, d.Err)
+			}
+			return cs(roleOK, ms(d.RTTms))
+		}
+	}
+	return c("")
+}
+
+func scanText(s netinfo.Snapshot, st Style) string {
+	sc := s.Active.WiFiScan
+	switch {
+	case !sc.Done:
+		return "nearby  " + st.paint(roleWait, pendingText+" scanning")
+	case sc.Err != "":
+		return "nearby  " + st.paint(roleHint, sc.Err)
+	}
+	return fmt.Sprintf("nearby  %d networks · %d on channel %d · strongest %d dBm", sc.Networks, sc.SameChannel, s.WiFi.Channel, sc.Strongest)
+}
+
+func nonEmpty(xs ...string) []string {
+	var out []string
+	for _, x := range xs {
+		if x != "" && x != "0" {
+			out = append(out, x)
+		}
+	}
+	return out
+}
+
+func peerPing(s netinfo.Snapshot, name string) *netinfo.PeerPing {
+	if s.Active == nil {
+		return nil
+	}
+	for i := range s.Active.Peers {
+		if s.Active.Peers[i].Peer == name {
+			return &s.Active.Peers[i]
+		}
+	}
+	return nil
+}
+
+func internetBody(s netinfo.Snapshot, full bool, st Style) string {
+	if s.Active == nil || s.Active.Internet == nil {
+		return "  " + st.paint(roleHint, "needs --active: it asks servers on the internet") + "\n"
+	}
+	in := s.Active.Internet
+	val := func(v string) cell {
+		if !in.Done {
+			return st.wait()
+		}
+		return c(dash(v))
+	}
+	lat := ""
+	if in.LatencyMs > 0 {
+		lat = ms(in.LatencyMs) + " to 1.1.1.1"
+	}
+	cg := cs(roleHint, "")
+	switch {
+	case !in.Done:
+		cg = st.wait()
+	case strings.HasPrefix(in.CGNAT, "yes"):
+		cg = cs(roleWarn, in.CGNAT+": no inbound IPv4")
+	default:
+		cg = c(dash(in.CGNAT))
+	}
+	v6 := val(in.IPv6)
+	if in.Done && in.IPv6 == "" {
+		v6 = cs(roleHint, "none: no IPv6 route out")
+	}
+	rows := [][]cell{
+		{cs(roleHint, "public ipv4"), val(in.IPv4)},
+		{cs(roleHint, "public ipv6"), v6},
+		{cs(roleHint, "cgnat"), cg},
+		{cs(roleHint, "latency"), val(lat)},
+	}
+	out := st.table("  ", rows)
+	if in.Err != "" {
+		out += "  " + st.paint(roleBad, in.Err) + "\n"
+	}
+	if full {
+		out += "  " + st.paint(roleHint, "from Cloudflare's 1.1.1.1 trace page, and the first four traceroute hops") + "\n"
+	}
+	return out
 }

@@ -11,6 +11,7 @@ import "time"
 // passively.
 type Snapshot struct {
 	Taken      time.Time     `json:"taken"`
+	OS         string        `json:"os"`
 	Location   Location      `json:"location"`
 	Interfaces []Interface   `json:"interfaces"`
 	Defaults   []Route       `json:"default_routes"`
@@ -22,6 +23,8 @@ type Snapshot struct {
 	VPN        VPN           `json:"vpn"`
 	Firewall   Firewall      `json:"firewall"`
 	Listening  []Listener    `json:"listening"`
+	// Active holds what --active found. It is nil for a passive run.
+	Active *Active `json:"active,omitempty"`
 	// Problems lists sources that could not be read. The sections that
 	// depend on them are empty, not wrong.
 	Problems []string `json:"problems,omitempty"`
@@ -81,9 +84,18 @@ type DeviceGroup struct {
 	Via       string `json:"via"`
 	Interface string `json:"interface"`
 	Router    string `json:"router,omitempty"`
-	// Count is nil for a subnet this machine cannot see: one behind a VPN.
+	// Count is nil for a subnet this machine cannot see: one behind a VPN
+	// that nobody asked about.
 	Count   *int     `json:"count"`
 	Devices []Device `json:"devices,omitempty"`
+	// AskedVia names the machine that answered for a subnet behind a VPN.
+	AskedVia string `json:"asked_via,omitempty"`
+	// Note says why a remote subnet has no answer ("bravo has no snetwork").
+	Note string `json:"note,omitempty"`
+	// Swept is true when --active swept the subnet before counting.
+	Swept bool `json:"swept,omitempty"`
+	// Pending is true while a remote router is still being asked.
+	Pending bool `json:"pending,omitempty"`
 }
 
 // Device is one ARP cache entry.
@@ -95,6 +107,15 @@ type Device struct {
 	// address, as phones use for each Wi-Fi network.
 	Private bool `json:"private_address"`
 	Gateway bool `json:"gateway"`
+	// Vendor comes from the IEEE registry of hardware address prefixes.
+	Vendor string `json:"vendor,omitempty"`
+	// Name is a friendly name, and NameSource says where it came from:
+	// ssh config, tailscale, known_hosts, dns or mdns.
+	Name       string `json:"name,omitempty"`
+	NameSource string `json:"name_source,omitempty"`
+	// Also holds this machine's other addresses on the same subnet: one
+	// device with a wired and a Wi-Fi link is one entry.
+	Also []string `json:"also,omitempty"`
 }
 
 // Lease is the DHCP state of one interface.
@@ -136,6 +157,7 @@ type WiFi struct {
 	PowerOn    bool    `json:"power_on"`
 	Associated bool    `json:"associated"`
 	Name       string  `json:"name"` // "" when macOS hides it
+	NameSource string  `json:"name_source,omitempty"`
 	Band       string  `json:"band,omitempty"`
 	Channel    int     `json:"channel,omitempty"`
 	Width      string  `json:"width,omitempty"`
@@ -188,11 +210,17 @@ type VPNService struct {
 	Enabled bool   `json:"enabled"`
 }
 
-// Firewall is what can be read about packet filtering without sudo.
+// Firewall is what can be read about packet filtering without root.
 type Firewall struct {
-	App     string `json:"application_firewall"` // on, off, block all, unknown
-	Stealth string `json:"stealth_mode"`         // on, off, unknown
-	PF      string `json:"pf"`
+	Tools []FirewallTool `json:"tools"`
+}
+
+// FirewallTool is one filtering tool: the macOS application firewall, pf,
+// ufw or nftables.
+type FirewallTool struct {
+	Name   string `json:"name"`
+	State  string `json:"state"` // on, off, active, inactive, unknown, block all
+	Detail string `json:"detail,omitempty"`
 }
 
 // Listener is a TCP port that accepts connections from beyond this machine.
@@ -202,4 +230,77 @@ type Listener struct {
 	Family  string `json:"family"`  // ipv4, ipv6, both
 	Process string `json:"process,omitempty"`
 	PID     int    `json:"pid,omitempty"`
+}
+
+// Active is what --active found. A probe that has not finished has Done
+// false; the renderer shows it as pending.
+type Active struct {
+	Sweeps   []Sweep     `json:"sweeps"`
+	Gateways []Probe     `json:"gateways"`
+	Peers    []PeerPing  `json:"peers"`
+	DNS      []DNSProbe  `json:"dns"`
+	WiFiScan *WiFiScan   `json:"wifi_scan,omitempty"`
+	Internet *Internet   `json:"internet,omitempty"`
+	Names    *NamesProbe `json:"names,omitempty"`
+}
+
+// Sweep is one subnet that --active swept to fill the ARP cache.
+type Sweep struct {
+	Prefix  string `json:"prefix"`
+	Probed  int    `json:"probed"`
+	Skipped string `json:"skipped,omitempty"` // why it was not swept
+	Done    bool   `json:"done"`
+}
+
+// Probe is one ping.
+type Probe struct {
+	Target    string  `json:"target"`
+	Interface string  `json:"interface,omitempty"`
+	RTTms     float64 `json:"rtt_ms,omitempty"`
+	Err       string  `json:"error,omitempty"`
+	Done      bool    `json:"done"`
+}
+
+// PeerPing is one `tailscale ping`.
+type PeerPing struct {
+	Peer  string  `json:"peer"`
+	Path  string  `json:"path,omitempty"` // "direct 10.1.2.3:41641" or "relay fra"
+	RTTms float64 `json:"rtt_ms,omitempty"`
+	Err   string  `json:"error,omitempty"`
+	Done  bool    `json:"done"`
+}
+
+// DNSProbe is one lookup through one nameserver.
+type DNSProbe struct {
+	Server string  `json:"server"`
+	Name   string  `json:"name"`
+	Answer string  `json:"answer,omitempty"`
+	RTTms  float64 `json:"rtt_ms,omitempty"`
+	Err    string  `json:"error,omitempty"`
+	Done   bool    `json:"done"`
+}
+
+// WiFiScan counts the networks in range.
+type WiFiScan struct {
+	Networks    int    `json:"networks"`
+	SameChannel int    `json:"same_channel"`
+	Strongest   int    `json:"strongest_dbm,omitempty"`
+	Err         string `json:"error,omitempty"`
+	Done        bool   `json:"done"`
+}
+
+// Internet is what the outside world sees.
+type Internet struct {
+	IPv4      string  `json:"public_ipv4,omitempty"`
+	IPv6      string  `json:"public_ipv6,omitempty"`
+	CGNAT     string  `json:"cgnat,omitempty"` // "yes (hop 2: 100.64.1.1)", "no", "unknown: …"
+	LatencyMs float64 `json:"latency_ms,omitempty"`
+	Err       string  `json:"error,omitempty"`
+	Done      bool    `json:"done"`
+}
+
+// NamesProbe is the reverse DNS and mDNS lookups for the devices found.
+type NamesProbe struct {
+	Found int  `json:"found"`
+	Done  bool `json:"done"`
 }

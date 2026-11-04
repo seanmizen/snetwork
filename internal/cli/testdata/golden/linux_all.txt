@@ -1,0 +1,90 @@
+snetwork · other network · 192.168.50.10 on Ethernet · tailnet up
+
+interfaces
+  enp1s0      Ethernet       192.168.50.10/24  up       ← default route
+    ipv6 2001:db8:0:2::10
+    mac 00:16:3e:00:00:61 · mtu 1500
+  wlp2s0      Wi-Fi          192.168.50.11/24  up
+    mac 00:16:3e:00:00:62 · mtu 1500
+  docker0     Docker bridge  172.17.0.1/16     no link
+    mac 02:42:00:00:00:63 · mtu 1500
+  tailscale0  Tailscale      100.64.0.21       up
+    ipv6 fd7a:115c:a1e0::21
+    mtu 1280
+  veth12ab    veth           –                 up
+    mac 02:42:00:00:00:64 · mtu 1500
+  lo          loopback       127.0.0.1/8       up
+    mtu 65536
+
+subnets
+  192.168.50.0/24  direct   enp1s0
+  172.17.0.0/16    direct   docker0
+  10.40.50.0/24    via vpn  tailscale → bravo
+  100.64.0.0/10    via vpn  tailscale          tailnet · 2 of 2 peers online
+
+  default routes
+    default  192.168.50.1  enp1s0  in use
+    default  192.168.50.1  wlp2s0  scoped to wlp2s0
+
+devices
+  192.168.50.0/24  direct · enp1s0  2 seen recently  ARP cache, no scan
+    192.168.50.10  this machine
+    192.168.50.1   –             Xensource        00:16:3e:00:00:65  gateway
+    192.168.50.20  laptop        private address  02:00:00:00:00:66  name from tailscale
+
+  172.17.0.0/16  direct · docker0  0 seen recently  ARP cache, no scan
+    172.17.0.1  this machine
+
+  10.40.50.0/24  via vpn · tailscale  –  ssh to bravo failed: not installed
+
+dhcp
+  enp1s0  from 192.168.50.1 · 2h lease · 1h left
+          router 192.168.50.1 · dns 192.168.50.1, 1.1.1.1
+          address  192.168.50.10
+          domain   lan
+          started  20:00 today
+          expires  22:00 today
+          state    bound
+  wlp2s0  30m left
+          address  192.168.50.11
+          expires  21:30 today
+          state    dynamic
+
+dns
+  any name, asked in this order
+    1  127.0.0.53  systemd-resolved (local stub)
+       search lan
+    2  192.168.50.1  router, from DHCP
+       search lan · upstream of systemd-resolved
+
+wifi
+  network    example-net
+  interface  wlp2s0
+  channel    36 · 5 GHz · 80 MHz
+  signal     -52 dBm
+  rate       390 Mb/s
+  standard   802.11ac
+
+vpn
+  tailscale     connected
+  tailnet       owner@example.com
+  magicdns      tail0000.ts.net
+  this machine  server  100.64.0.21
+  exit node     none
+
+  peers
+    bravo   linux  ✓ online  routes 10.40.50.0/24  relay fra
+    laptop  macOS  ✓ online                        direct 192.168.50.20:41641
+
+internet
+  needs --active: it asks servers on the internet
+
+firewall
+  ufw       active    rules need root
+  nftables  inactive  rules need root
+
+listening
+  port   on             family  process
+  22     all addresses  both    –
+  9100   all addresses  both    node_exporter (901)
+  41641  100.64.0.21    ipv4    tailscaled (812)

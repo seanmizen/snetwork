@@ -31,7 +31,24 @@ func FuzzParsers(f *testing.F) {
 		parseVPNServices(s)
 		parseFirewall(s, s)
 		_, _ = parseTailscale([]byte(s))
-		Build(Raw{Ifconfig: s, Services: s, Routes: s, ARP: s, DNS: s, VPNList: s, Listening: s,
-			Tailscale: []byte(s), Summaries: map[string]string{"en0": s}}, time.Unix(0, 0))
+		parseIPAddr([]byte(s))
+		parseIPRoute([]byte(s))
+		parseNeigh(s)
+		parseSS(s)
+		parseIwDev(s)
+		parseDhcpcd("eth0", s)
+		parseResolvConf(s, s)
+		parseKnownHosts(s)
+		parseSSHConfig(s)
+		b := []byte(s)
+		for _, goos := range []string{"darwin", "linux"} {
+			out := map[string][]byte{}
+			for _, k := range []string{"ifconfig", "services", "routes", "arp", "dns", "vpnlist", "listening",
+				"tailscale", "getsummary-en0", "ip-addr", "ip-route", "ip-neigh", "resolv", "ss", "iw-dev",
+				"iw-link-wlan0", "known_hosts", "ssh_config", "names-dns"} {
+				out[k] = b
+			}
+			Build(Raw{OS: goos, Out: out}, time.Unix(0, 0))
+		}
 	})
 }

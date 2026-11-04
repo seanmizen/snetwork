@@ -1,5 +1,5 @@
 wifi
-  network    name hidden by macOS (grant Location to your terminal to see it)
+  network    name hidden by macOS
   interface  en0
   channel    112 · 5 GHz · 80 MHz
   signal     -59 dBm
@@ -9,3 +9,4 @@ wifi
   standard   802.11ac
   security   WPA2 Personal
   country    DE
+  to show the name: make a Shortcut called "Wi-Fi name" (Get Network Details → Network Name)

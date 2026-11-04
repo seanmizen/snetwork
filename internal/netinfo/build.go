@@ -7,24 +7,32 @@ import (
 	"time"
 )
 
-// Raw is the unparsed output of every source. Package collect fills it from
-// this machine; tests fill it from fixture files. An entry in Errs means
-// that source could not be read.
+// Raw is the unparsed output of every source, by source key. Package
+// collect fills it from this machine; tests fill it from fixture files.
 type Raw struct {
-	Ifconfig   string
-	Services   string            // networksetup -listnetworkserviceorder
-	Routes     string            // netstat -rn -f inet
-	ARP        string            // arp -an
-	DNS        string            // scutil --dns
-	VPNList    string            // scutil --nc list
-	Listening  string            // netstat -anv -p tcp
-	FWGlobal   string            // socketfilterfw --getglobalstate
-	FWStealth  string            // socketfilterfw --getstealthmode
-	Tailscale  []byte            // tailscale status --json
-	Summaries  map[string]string // ipconfig getsummary <iface>, by interface
-	WiFi       *WiFiRaw          // nil when there is no Wi-Fi interface
-	Errs       map[string]string // source -> error
-	NotPresent map[string]bool   // sources whose tool is not installed
+	OS  string            // "darwin" or "linux": which parsers apply
+	Out map[string][]byte // source key -> output
+	// WiFi is CoreWLAN's reading on macOS; nil elsewhere, or with no Wi-Fi.
+	WiFi *WiFiRaw
+	// Errs holds sources that failed; NotPresent, tools not installed.
+	Errs       map[string]string
+	NotPresent map[string]bool
+}
+
+// S returns one source's output as text.
+func (r Raw) S(key string) string { return string(r.Out[key]) }
+
+// parsed is what the OS-specific parsers produce. Build does the rest.
+type parsed struct {
+	ifs       []Interface
+	routes    []route
+	arp       []arpEntry
+	leases    []Lease
+	dns       DNS
+	wifi      *WiFi
+	firewall  Firewall
+	listening []Listener
+	vpnOthers []VPNService
 }
 
 // hotspot is the subnet that iOS Personal Hotspot always hands out.
@@ -36,7 +44,7 @@ var tailnetRange = netip.MustParsePrefix("100.64.0.0/10")
 // Build turns raw output into a Snapshot. It is pure: the same Raw and time
 // always give the same Snapshot.
 func Build(r Raw, now time.Time) Snapshot {
-	s := Snapshot{Taken: now}
+	s := Snapshot{Taken: now, OS: r.OS}
 	for src, err := range r.Errs {
 		s.Problems = append(s.Problems, src+": "+err)
 	}
@@ -46,18 +54,25 @@ func Build(r Raw, now time.Time) Snapshot {
 	switch {
 	case r.NotPresent["tailscale"]:
 		s.VPN.Tailscale = Tailscale{Installed: false}
-	case len(r.Tailscale) > 0:
-		if ts, err := parseTailscale(r.Tailscale); err == nil {
+	case len(r.Out["tailscale"]) > 0:
+		if ts, err := parseTailscale(r.Out["tailscale"]); err == nil {
 			s.VPN.Tailscale = ts
 		} else {
 			s.Problems = append(s.Problems, "tailscale: "+err.Error())
 		}
 	}
-	s.VPN.Others = otherVPNs(parseVPNServices(r.VPNList))
 
-	routes := parseRoutes(r.Routes)
-	s.Interfaces = buildInterfaces(parseIfconfig(r.Ifconfig), parseServiceOrder(r.Services), s.VPN.Tailscale)
-	s.Defaults = defaults(routes)
+	var p parsed
+	if r.OS == "linux" {
+		p = parseLinux(r, s.VPN.Tailscale, now)
+	} else {
+		p = parseDarwin(r, s.VPN.Tailscale, now)
+	}
+	s.Interfaces, s.DHCP, s.DNS, s.WiFi = p.ifs, p.leases, p.dns, p.wifi
+	s.Firewall, s.Listening = p.firewall, p.listening
+	s.VPN.Others = otherVPNs(p.vpnOthers)
+
+	s.Defaults = defaults(p.routes)
 	if len(s.Defaults) > 0 {
 		for i := range s.Interfaces {
 			if s.Interfaces[i].Name == s.Defaults[0].Interface {
@@ -65,135 +80,60 @@ func Build(r Raw, now time.Time) Snapshot {
 			}
 		}
 	}
-	s.Subnets, s.VPN.AllTrafficVia = buildSubnets(s.Interfaces, routes, s.VPN.Tailscale)
-	s.Devices = buildDevices(s.Subnets, parseARP(r.ARP), s.Defaults, ownAddrs(s.Interfaces))
-
-	for _, ifc := range s.Interfaces {
-		if out, ok := r.Summaries[ifc.Name]; ok {
-			if l, ok := parseLease(ifc.Name, out, now.Location()); ok {
-				s.DHCP = append(s.DHCP, l)
-			}
-		}
-	}
-	s.DNS = parseDNS(r.DNS)
-	if r.WiFi != nil {
-		s.WiFi = WiFiFromRaw(*r.WiFi)
-	}
-	s.Firewall = parseFirewall(r.FWGlobal, r.FWStealth)
-	s.Listening = parseListening(r.Listening)
+	s.Subnets, s.VPN.AllTrafficVia = buildSubnets(s.Interfaces, p.routes, s.VPN.Tailscale)
+	s.Devices = buildDevices(s.Subnets, p.arp, s.Defaults, ownAddrs(s.Interfaces))
+	nameDevices(&s, r)
 	s.Location = locate(s)
 	return s
 }
 
-// buildInterfaces merges ifconfig with the service order. A service whose
-// device ifconfig does not list is an unplugged adapter.
-func buildInterfaces(ifs []ifconfigEntry, svcs []service, ts Tailscale) []Interface {
-	byDev := map[string]service{}
-	for _, s := range svcs {
-		if s.device != "" {
-			byDev[s.device] = s
-		}
+// RebuildDevices recounts devices from a fresh ARP or neighbour table, as
+// --active does after a sweep. It keeps answers from remote routers.
+func RebuildDevices(s *Snapshot, r Raw) {
+	var arp []arpEntry
+	if r.OS == "linux" {
+		arp = parseNeigh(r.S("ip-neigh"))
+	} else {
+		arp = parseARP(r.S("arp"))
 	}
-	tsIPs := map[string]bool{}
-	for _, ip := range ts.Self.IPs {
-		tsIPs[ip] = true
-	}
-	present := map[string]bool{}
-	var list []Interface
-	for _, e := range ifs {
-		present[e.name] = true
-		ifc := Interface{Name: e.name, MTU: e.mtu, MAC: e.mac, IPv6: e.ipv6}
-		for _, p := range e.ipv4 {
-			ifc.IPv4 = append(ifc.IPv4, p.String())
-		}
-		svc, isSvc := byDev[e.name]
-		if isSvc {
-			ifc.Label, ifc.Order = svc.port, svc.order
-		}
-		ifc.Kind = kindOf(e.name, ifc.Label)
-		switch {
-		case e.status == "active":
-			ifc.State = "up"
-		case e.status == "inactive":
-			ifc.State = "no link"
-		case e.has("UP") && e.has("RUNNING"):
-			ifc.State = "up"
-		default:
-			ifc.State = "down"
-		}
-		if ifc.Kind == "tunnel" {
-			ifc.Label = "tunnel"
-			for _, p := range e.ipv4 {
-				if tsIPs[p.Addr().String()] || (len(tsIPs) == 0 && tailnetRange.Contains(p.Addr())) {
-					ifc.Label = "Tailscale"
-				}
+	fresh := buildDevices(s.Subnets, arp, s.Defaults, ownAddrs(s.Interfaces))
+	for i := range fresh {
+		for _, old := range s.Devices {
+			if old.Prefix != fresh[i].Prefix {
+				continue
+			}
+			if fresh[i].Count == nil {
+				fresh[i] = old // a remote router's answer
+			} else {
+				fresh[i].Swept = old.Swept
 			}
 		}
-		if ifc.Label == "" {
-			ifc.Label = defaultLabel(ifc.Kind)
-		}
-		list = append(list, ifc)
 	}
-	for _, s := range svcs {
-		if s.device != "" && !present[s.device] {
-			state := "not plugged in"
-			if s.disabled {
-				state = "disabled"
-			}
-			list = append(list, Interface{
-				Name: s.device, Label: s.port, Kind: kindOf(s.device, s.port),
-				State: state, Order: s.order,
-			})
-		}
-	}
-	return list
+	s.Devices = fresh
+	nameDevices(s, r)
 }
 
-func kindOf(name, port string) string {
-	p := strings.ToLower(port)
-	switch {
-	case name == "lo0" || strings.HasPrefix(name, "lo"):
-		return "loopback"
-	case p == "wi-fi":
-		return "wifi"
-	case strings.HasPrefix(p, "iphone"):
-		return "iphone"
-	case strings.Contains(p, "bridge") || strings.HasPrefix(name, "bridge"):
-		return "bridge"
-	case strings.Contains(p, "ethernet") || strings.Contains(p, "lan") || strings.HasPrefix(p, "thunderbolt"):
-		return "ethernet"
-	case strings.HasPrefix(name, "utun") || strings.HasPrefix(name, "ipsec") || strings.HasPrefix(name, "ppp"):
-		return "tunnel"
-	}
-	return "other"
-}
-
-func defaultLabel(kind string) string {
-	switch kind {
-	case "loopback":
-		return "loopback"
-	case "bridge":
-		return "bridge"
-	}
-	return "system"
-}
-
-// defaults returns the default routes, the one in use first. A route with
-// the I flag is scoped to its interface and is not the system default.
+// defaults returns the default routes, the one in use first. A scoped route
+// (I flag on macOS) and a route with a higher metric come after.
 func defaults(routes []route) []Route {
-	var main, scoped []Route
+	var list []route
 	for _, r := range routes {
-		if r.prefix.Bits() != 0 {
-			continue
-		}
-		rt := Route{Prefix: "default", Gateway: r.gateway, Interface: r.netif, Flags: r.flags}
-		if strings.Contains(r.flags, "I") {
-			scoped = append(scoped, rt)
-		} else {
-			main = append(main, rt)
+		if r.prefix.Bits() == 0 {
+			list = append(list, r)
 		}
 	}
-	return append(main, scoped...)
+	sort.SliceStable(list, func(i, j int) bool {
+		si, sj := strings.Contains(list[i].flags, "I"), strings.Contains(list[j].flags, "I")
+		if si != sj {
+			return !si
+		}
+		return list[i].metric < list[j].metric
+	})
+	out := make([]Route, 0, len(list))
+	for _, r := range list {
+		out = append(out, Route{Prefix: "default", Gateway: r.gateway, Interface: r.netif, Flags: r.flags})
+	}
+	return out
 }
 
 // buildSubnets lists the subnets this machine sits on, then those it reaches
@@ -219,7 +159,7 @@ func buildSubnets(ifs []Interface, routes []route, ts Tailscale) ([]Subnet, stri
 	var list []Subnet
 	have := map[netip.Prefix]bool{}
 	for _, ifc := range ifs {
-		if ifc.Kind == "loopback" || ifc.Kind == "tunnel" {
+		if ifc.Kind == "loopback" || ifc.Kind == "tunnel" || ifc.Kind == "virtual" {
 			continue
 		}
 		for _, a := range ifc.IPv4 {

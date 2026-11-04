@@ -13,6 +13,7 @@ type route struct {
 	gateway string
 	flags   string
 	netif   string
+	metric  int // Linux only; 0 on macOS
 }
 
 // parseRoutes reads `netstat -rn -f inet`. It keeps default and network

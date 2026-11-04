@@ -1,0 +1,50 @@
+every 5s · 21:00:00 · ctrl-c stops
+vpn
+  tailscale     connected
+  tailnet       owner@example.com
+  magicdns      tail0000.ts.net
+  this machine  laptop  100.64.0.10, fd7a:115c:a1e0::a
+  exit node     none
+
+  peers
+    alpha  linux  ✓ online   routes 10.20.30.0/24  direct 10.20.30.108:41641
+    bravo  linux  ✓ online   routes 10.40.50.0/24  relay fra
+    phone  iOS    ✗ offline                        last seen 3h 43m ago
+
+  other VPNs in System Settings
+    Example WireGuard®  off
+    Example WireGuard   off
+
+every 5s · 21:00:05 · ctrl-c stops
+vpn
+  tailscale     connected
+  tailnet       owner@example.com
+  magicdns      tail0000.ts.net
+  this machine  laptop  100.64.0.10, fd7a:115c:a1e0::a
+  exit node     none
+
+  peers
+    alpha  linux  ✓ online   routes 10.20.30.0/24  direct 10.20.30.108:41641
+    bravo  linux  ✓ online   routes 10.40.50.0/24  relay fra
+    phone  iOS    ✗ offline                        last seen 3h 43m ago
+
+  other VPNs in System Settings
+    Example WireGuard®  off
+    Example WireGuard   off
+
+every 5s · 21:00:10 · ctrl-c stops
+vpn
+  tailscale     connected
+  tailnet       owner@example.com
+  magicdns      tail0000.ts.net
+  this machine  laptop  100.64.0.10, fd7a:115c:a1e0::a
+  exit node     none
+
+  peers
+    alpha  linux  ✓ online   routes 10.20.30.0/24  direct 10.20.30.108:41641
+    bravo  linux  ✓ online   routes 10.40.50.0/24  relay fra
+    phone  iOS    ✗ offline                        last seen 3h 43m ago
+
+  other VPNs in System Settings
+    Example WireGuard®  off
+    Example WireGuard   off

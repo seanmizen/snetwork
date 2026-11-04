@@ -1,0 +1,12 @@
+{
+  "prefix": "10.40.50.0/24",
+  "via": "direct",
+  "interface": "wlan0",
+  "count": 3,
+  "devices": [
+    {"ip": "10.40.50.1", "mac": "00:16:3e:00:00:51", "interface": "wlan0", "private_address": false, "gateway": true, "vendor": "Ubiquiti", "name": "unifi", "name_source": "dns"},
+    {"ip": "10.40.50.57", "mac": "02:00:00:00:00:52", "interface": "wlan0", "private_address": true, "gateway": false, "name": "Pixel-10", "name_source": "dns"},
+    {"ip": "10.40.50.88", "mac": "00:16:3e:00:00:53", "interface": "wlan0", "private_address": false, "gateway": false, "vendor": "Synology", "name": "basecamp", "name_source": "dns"}
+  ],
+  "swept": true
+}

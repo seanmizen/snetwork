@@ -12,8 +12,8 @@ subnets                                           snetwork subnets
   100.64.0.0/10  via vpn  tailscale          tailnet · 2 of 3 peers online
 
 devices                                           snetwork devices
-  10.20.30.0/24  11 seen recently  ARP cache, no scan
-  10.40.50.0/24  –                 behind bravo: not visible from here
+  10.20.30.0/24  10 seen recently  ARP cache, no scan
+  10.40.50.0/24  –                 behind bravo · snetwork devices 10.40.50.0/24 asks it
 
 dhcp                                              snetwork dhcp
   en0   from 10.20.30.1 · 24h lease · 21h 20m left
@@ -27,12 +27,12 @@ wifi                                              snetwork wifi
   name hidden by macOS · 5 GHz ch 112 · 80 MHz · -59 dBm · 117 Mb/s
 
 vpn                                               snetwork vpn
-  tailscale  connected · alpha ✓ bravo ✓ phone ✗ · no exit node
+  tailscale  connected · alpha ✓  bravo ✓  phone ✗ · no exit node
   others     Example WireGuard® off · Example WireGuard off
 
 firewall                                          snetwork firewall
-  macOS app firewall  on · stealth off
-  pf                  unknown without sudo
+  macOS app firewall  on       stealth off
+  pf                  unknown  needs root
 
 listening                                         snetwork listening
-  12 ports reachable beyond loopback: 4100 bun, 5000 ControlCenter, 33894 IPNExtension, 34022 IPNExtension, 49425 Python, …
+  open  12 ports beyond loopback: 4100 bun, 5000 ControlCenter, 33894 IPNExtension, 34022 IPNExtension, 49425 Python, …

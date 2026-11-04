@@ -3,4 +3,4 @@ ENVIRONMENT
   FORCE_COLOR    any value but 0 forces colour, even when piped
 
 EXIT STATUS
-  0 ok  ·  1 couldn't write output  ·  2 bad usage
+  0 ok  ·  1 couldn't write output, or --via failed  ·  2 bad usage

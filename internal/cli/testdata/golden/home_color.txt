@@ -12,8 +12,8 @@
   [36m100.64.0.0/10[0m  via vpn  tailscale          [2mtailnet · 2 of 3 peers online[0m
 
 [1;33mdevices[0m                                           [2msnetwork devices[0m
-  [36m10.20.30.0/24[0m  11 seen recently  [2mARP cache, no scan[0m
-  [36m10.40.50.0/24[0m  –                 [2mbehind bravo: not visible from here[0m
+  [36m10.20.30.0/24[0m  10 seen recently  [2mARP cache, no scan[0m
+  [36m10.40.50.0/24[0m  –                 [2mbehind bravo · snetwork devices 10.40.50.0/24 asks it[0m
 
 [1;33mdhcp[0m                                              [2msnetwork dhcp[0m
   [36men0[0m   from 10.20.30.1[2m · [0m24h lease[2m · [0m21h 20m left
@@ -27,12 +27,12 @@
   [2mname hidden by macOS[0m[2m · [0m5 GHz ch 112[2m · [0m80 MHz[2m · [0m-59 dBm[2m · [0m117 Mb/s
 
 [1;33mvpn[0m                                               [2msnetwork vpn[0m
-  tailscale  [32mconnected[0m[2m · [0malpha [32m✓[0m bravo [32m✓[0m phone [31m✗[0m[2m · [0mno exit node
+  tailscale  [32mconnected[0m[2m · [0malpha [32m✓[0m  bravo [32m✓[0m  phone [31m✗[0m[2m · [0mno exit node
   others     Example WireGuard® off[2m · [0mExample WireGuard off
 
 [1;33mfirewall[0m                                          [2msnetwork firewall[0m
-  macOS app firewall  [32mon · stealth off[0m
-  pf                  [2munknown without sudo[0m
+  macOS app firewall  [32mon[0m       [2mstealth off[0m
+  pf                  [2munknown[0m  [2mneeds root[0m
 
 [1;33mlistening[0m                                         [2msnetwork listening[0m
-  12 ports reachable beyond loopback: 4100 bun, 5000 ControlCenter, 33894 IPNExtension, 34022 IPNExtension, 49425 Python, …
+  open  12 ports beyond loopback: 4100 bun, 5000 ControlCenter, 33894 IPNExtension, 34022 IPNExtension, 49425 Python, …

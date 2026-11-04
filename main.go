@@ -3,7 +3,9 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
 
 	"github.com/seanmizen/snetwork/internal/cli"
 )
@@ -12,5 +14,8 @@ import (
 var version = "dev"
 
 func main() {
-	os.Exit(cli.Main(version, cli.OSEnv()))
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	code := cli.Main(version, cli.OSEnv(ctx))
+	stop()
+	os.Exit(code)
 }

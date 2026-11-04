@@ -100,20 +100,20 @@ func parseVPNServices(out string) []VPNService {
 
 // parseFirewall reads socketfilterfw --getglobalstate and --getstealthmode.
 func parseFirewall(global, stealth string) Firewall {
-	fw := Firewall{App: "unknown", Stealth: "unknown", PF: "unknown without sudo"}
+	app := FirewallTool{Name: "macOS app firewall", State: "unknown"}
 	switch {
 	case strings.Contains(global, "State = 2"), strings.Contains(global, "blocking all"):
-		fw.App = "block all"
+		app.State = "block all"
 	case strings.Contains(global, "is enabled"):
-		fw.App = "on"
+		app.State = "on"
 	case strings.Contains(global, "is disabled"):
-		fw.App = "off"
+		app.State = "off"
 	}
 	switch {
 	case strings.Contains(stealth, "is on"), strings.Contains(stealth, "is enabled"):
-		fw.Stealth = "on"
+		app.Detail = "stealth on"
 	case strings.Contains(stealth, "is off"), strings.Contains(stealth, "is disabled"):
-		fw.Stealth = "off"
+		app.Detail = "stealth off"
 	}
-	return fw
+	return Firewall{Tools: []FirewallTool{app, {Name: "pf", State: "unknown", Detail: "needs root: sudo pfctl -s info"}}}
 }

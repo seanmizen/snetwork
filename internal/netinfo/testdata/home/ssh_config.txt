@@ -1,0 +1,9 @@
+Host *
+  ServerAliveInterval 30
+
+Host printer
+  HostName 10.20.30.120
+
+Host gw router
+  HostName=10.20.30.1
+  User admin

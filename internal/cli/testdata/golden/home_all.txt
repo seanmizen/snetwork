@@ -38,21 +38,24 @@ subnets
     default  –           utun7  scoped to utun7
 
 devices
-  10.20.30.0/24  direct · en0 · 11 seen recently  ARP cache, no scan
+  10.20.30.0/24  direct · en0  10 seen recently  ARP cache, no scan
     10.20.30.102  this machine
-    10.20.30.1    00:16:3e:00:00:06  gateway
-    10.20.30.100  02:00:00:00:00:07  private address
-    10.20.30.101  00:16:3e:00:00:08
-    10.20.30.103  00:16:3e:00:00:09
-    10.20.30.105  02:00:00:00:00:0a  private address
-    10.20.30.106  00:16:3e:00:00:0b
-    10.20.30.107  00:16:3e:00:00:0c
-    10.20.30.108  00:16:3e:00:00:0d
-    10.20.30.109  02:00:00:00:00:0e  private address
-    10.20.30.110  02:00:00:00:00:0f  private address
-    10.20.30.120  00:16:3e:00:00:10
+    10.20.30.1    gw            Xensource        00:16:3e:00:00:06  gateway · name from ssh config
+    10.20.30.100  –             private address  02:00:00:00:00:07
+    10.20.30.101  –             Xensource        00:16:3e:00:00:08
+    10.20.30.103  alpha         Xensource        00:16:3e:00:00:09  name from known_hosts
+      └ also 10.20.30.108
+    10.20.30.105  –             private address  02:00:00:00:00:0a
+    10.20.30.106  –             Xensource        00:16:3e:00:00:0b
+    10.20.30.107  –             Xensource        00:16:3e:00:00:0c
+    10.20.30.109  –             private address  02:00:00:00:00:0e
+    10.20.30.110  –             private address  02:00:00:00:00:0f
+    10.20.30.120  printer       Xensource        00:16:3e:00:00:10  name from ssh config
 
-  10.40.50.0/24  via vpn · tailscale  behind bravo: not visible from here
+  10.40.50.0/24  via vpn · tailscale  3 seen  asked bravo
+    10.40.50.1   unifi     Ubiquiti         00:16:3e:00:00:51  gateway · name from dns
+    10.40.50.57  Pixel-10  private address  02:00:00:00:00:52  name from dns
+    10.40.50.88  basecamp  Synology         00:16:3e:00:00:53  name from dns
 
 dhcp
   en0   from 10.20.30.1 · 24h lease · 21h 20m left
@@ -76,7 +79,7 @@ dns
     local + 5 reverse zones  multicast DNS    answers stay on the local network
 
 wifi
-  network    name hidden by macOS (grant Location to your terminal to see it)
+  network    name hidden by macOS
   interface  en0
   channel    112 · 5 GHz · 80 MHz
   signal     -59 dBm
@@ -86,6 +89,7 @@ wifi
   standard   802.11ac
   security   WPA2 Personal
   country    DE
+  to show the name: make a Shortcut called "Wi-Fi name" (Get Network Details → Network Name)
 
 vpn
   tailscale     connected
@@ -103,10 +107,12 @@ vpn
     Example WireGuard®  off
     Example WireGuard   off
 
+internet
+  needs --active: it asks servers on the internet
+
 firewall
-  macOS app firewall  on · stealth off
-  pf                  unknown without sudo
-  pf needs root to read: sudo pfctl -s info
+  macOS app firewall  on       stealth off
+  pf                  unknown  needs root: sudo pfctl -s info
 
 listening
   port   on             family  process

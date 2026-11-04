@@ -1,18 +1,24 @@
 SECTIONS  snetwork SECTION [ITEM]
   interfaces [NAME]   every interface, the default route first
   subnets             networks you sit on, and those a VPN reaches; default routes
-  devices [SUBNET]    devices in the ARP cache, per subnet you sit on
+  devices [SUBNET]    devices per subnet, with names and makers; a subnet behind
+                      the tailnet is asked of the peer that routes it
   dhcp [NAME]         lease, server, router and DNS, and time left
-  dns                 resolvers in the order macOS asks them
-  wifi                band, channel, width, signal, noise, rate
+  dns                 resolvers in the order the system asks them
+  wifi                band, channel, width, signal, rate; --active: networks nearby
   vpn [PEER]          Tailscale peers and routes; other VPNs
-  firewall            the macOS application firewall
+  internet            --active only: public addresses, carrier-grade NAT, latency
+  firewall            the macOS application firewall and pf; ufw and nftables
   listening           TCP ports that accept connections from other machines
   all                 every section in full
 
+NAMES  strongest first
+  your ssh config (Host with a HostName address), Tailscale, known_hosts,
+  and with --active the router's DNS, then mDNS. One machine with two
+  addresses on one subnet shows once.
+
 NOTES
-  devices   counts what this Mac has talked to lately. It is not a scan,
-            and it cannot see subnets behind a VPN.
-  wifi      macOS hides the network name unless your terminal has
-            Location Services permission. Everything else shows without it.
-  firewall  pf needs root, so snetwork does not read it.
+  devices   without --active: what this machine talked to lately, not a scan.
+  wifi      macOS hides the network name from the terminal. A Shortcut
+            called "Wi-Fi name" (Get Network Details → Network Name) shows it.
+  firewall  rules need root, so snetwork does not read them.

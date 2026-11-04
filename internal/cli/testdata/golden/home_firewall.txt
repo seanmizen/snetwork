@@ -1,4 +1,3 @@
 firewall
-  macOS app firewall  on · stealth off
-  pf                  unknown without sudo
-  pf needs root to read: sudo pfctl -s info
+  macOS app firewall  on       stealth off
+  pf                  unknown  needs root: sudo pfctl -s info

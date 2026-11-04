@@ -1,16 +1,19 @@
 devices
-  10.20.30.0/24  direct · en0 · 11 seen recently  ARP cache, no scan
+  10.20.30.0/24  direct · en0  10 seen recently  ARP cache, no scan
     10.20.30.102  this machine
-    10.20.30.1    00:16:3e:00:00:06  gateway
-    10.20.30.100  02:00:00:00:00:07  private address
-    10.20.30.101  00:16:3e:00:00:08
-    10.20.30.103  00:16:3e:00:00:09
-    10.20.30.105  02:00:00:00:00:0a  private address
-    10.20.30.106  00:16:3e:00:00:0b
-    10.20.30.107  00:16:3e:00:00:0c
-    10.20.30.108  00:16:3e:00:00:0d
-    10.20.30.109  02:00:00:00:00:0e  private address
-    10.20.30.110  02:00:00:00:00:0f  private address
-    10.20.30.120  00:16:3e:00:00:10
+    10.20.30.1    gw            Xensource        00:16:3e:00:00:06  gateway · name from ssh config
+    10.20.30.100  –             private address  02:00:00:00:00:07
+    10.20.30.101  –             Xensource        00:16:3e:00:00:08
+    10.20.30.103  alpha         Xensource        00:16:3e:00:00:09  name from known_hosts
+      └ also 10.20.30.108
+    10.20.30.105  –             private address  02:00:00:00:00:0a
+    10.20.30.106  –             Xensource        00:16:3e:00:00:0b
+    10.20.30.107  –             Xensource        00:16:3e:00:00:0c
+    10.20.30.109  –             private address  02:00:00:00:00:0e
+    10.20.30.110  –             private address  02:00:00:00:00:0f
+    10.20.30.120  printer       Xensource        00:16:3e:00:00:10  name from ssh config
 
-  10.40.50.0/24  via vpn · tailscale  behind bravo: not visible from here
+  10.40.50.0/24  via vpn · tailscale  3 seen  asked bravo
+    10.40.50.1   unifi     Ubiquiti         00:16:3e:00:00:51  gateway · name from dns
+    10.40.50.57  Pixel-10  private address  02:00:00:00:00:52  name from dns
+    10.40.50.88  basecamp  Synology         00:16:3e:00:00:53  name from dns

@@ -12,3 +12,8 @@ import (
 func ReadWiFi() (*netinfo.WiFiRaw, error) {
 	return nil, errors.New("this build cannot read Wi-Fi (needs macOS and cgo)")
 }
+
+// ScanWiFi needs CoreWLAN; on Linux a scan needs root.
+func ScanWiFi(channel int) netinfo.WiFiScan {
+	return netinfo.WiFiScan{Err: "a scan needs macOS, or root on Linux", Done: true}
+}

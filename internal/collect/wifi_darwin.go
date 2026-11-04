@@ -43,6 +43,28 @@ static snet_wifi snet_read_wifi(void) {
 	}
 	return w;
 }
+typedef struct { int total, same, strongest, err; } snet_scan;
+
+static snet_scan snet_scan_wifi(int channel) {
+	snet_scan r = {0, 0, 0, 0};
+	@autoreleasepool {
+		CWInterface *i = [[CWWiFiClient sharedWiFiClient] interface];
+		if (!i) { r.err = 1; return r; }
+		NSError *e = nil;
+		NSSet<CWNetwork *> *nets = [i scanForNetworksWithName:nil error:&e];
+		if (e || !nets) { r.err = 2; return r; }
+		r.strongest = -200;
+		for (CWNetwork *n in nets) {
+			r.total++;
+			if (n.wlanChannel && (int)n.wlanChannel.channelNumber == channel) {
+				r.same++;
+			}
+			if ((int)n.rssiValue > r.strongest) r.strongest = (int)n.rssiValue;
+		}
+		if (r.strongest == -200) r.strongest = 0;
+	}
+	return r;
+}
 */
 import "C"
 
@@ -71,4 +93,14 @@ func ReadWiFi() (*netinfo.WiFiRaw, error) {
 		Security:  int(w.security),
 		Country:   C.GoString(&w.country[0]),
 	}, nil
+}
+
+// ScanWiFi counts the networks in range, and those on channel. A scan
+// takes a few seconds and changes nothing: macOS scans like this on its own.
+func ScanWiFi(channel int) netinfo.WiFiScan {
+	r := C.snet_scan_wifi(C.int(channel))
+	if r.err != 0 {
+		return netinfo.WiFiScan{Err: "scan failed", Done: true}
+	}
+	return netinfo.WiFiScan{Networks: int(r.total), SameChannel: int(r.same), Strongest: int(r.strongest), Done: true}
 }

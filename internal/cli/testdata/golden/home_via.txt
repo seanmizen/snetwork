@@ -1,0 +1,33 @@
+snetwork · other network · 192.168.1.50 on USB 10/100/1000 LAN · no tailscale
+
+interfaces                                        snetwork interfaces
+  en8      USB 10/100/1000 LAN  192.168.1.50/24  up        ← default route
+  en0      Wi-Fi                –                no link
+  bridge0  Thunderbolt Bridge   –                disabled
+  + 1 more
+
+subnets                                           snetwork subnets
+  192.168.1.0/24  direct  en8
+
+devices                                           snetwork devices
+  192.168.1.0/24  2 seen recently  ARP cache, no scan
+
+dhcp                                              snetwork dhcp
+  en8   from 192.168.1.1 · 5m lease · expired 1h ago
+        router 192.168.1.1 · dns 192.168.1.1, 1.1.1.1
+
+dns                                               snetwork dns
+  1  192.168.1.1  router, from DHCP
+
+wifi                                              snetwork wifi
+  en0: Wi-Fi is off
+
+vpn                                               snetwork vpn
+  tailscale  not installed
+
+firewall                                          snetwork firewall
+  macOS app firewall  off      stealth off
+  pf                  unknown  needs root
+
+listening                                         snetwork listening
+  nothing listens beyond loopback

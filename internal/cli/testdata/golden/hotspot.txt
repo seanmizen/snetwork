@@ -15,8 +15,8 @@ subnets                                           snetwork subnets
 
 devices                                           snetwork devices
   172.20.10.0/28  1 seen recently  ARP cache, no scan
-  10.20.30.0/24   –                behind alpha: not visible from here
-  10.40.50.0/24   –                behind bravo: not visible from here
+  10.20.30.0/24   –                behind alpha · snetwork devices 10.20.30.0/24 asks it
+  10.40.50.0/24   –                behind bravo · snetwork devices 10.40.50.0/24 asks it
 
 dhcp                                              snetwork dhcp
   en0   from 172.20.10.1 · 24h lease · 23h left
@@ -29,12 +29,12 @@ wifi                                              snetwork wifi
   name hidden by macOS · 2.4 GHz ch 6 · 20 MHz · -48 dBm · 144.4 Mb/s
 
 vpn                                               snetwork vpn
-  tailscale  connected · alpha ✓ bravo ✓ · no exit node
+  tailscale  connected · alpha ✓  bravo ✓ · no exit node
   tunnel     utun9 takes all traffic, and is not in System Settings
 
 firewall                                          snetwork firewall
-  macOS app firewall  on · stealth on
-  pf                  unknown without sudo
+  macOS app firewall  on       stealth on
+  pf                  unknown  needs root
 
 listening                                         snetwork listening
-  1 port reachable beyond loopback: 22 launchd
+  open  1 port beyond loopback: 22 launchd

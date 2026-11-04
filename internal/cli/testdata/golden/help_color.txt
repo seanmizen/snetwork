@@ -5,6 +5,18 @@
   snetwork [36mSECTION[0m [36m[ITEM][0m       one section in full [2m· see[0m snetwork -h sections
   snetwork all                   every section in full
 
+[1;33mPROBES[0m  [2mplain snetwork sends no packets[0m
+  [32m--active[0m[36m[=30s][0m            also probe: sweep this LAN (a /24 at most), ping the
+                         gateway and tailnet peers, time DNS, scan Wi-Fi, ask the
+                         internet. Changes nothing. The interval is for --watch.
+  [32m--watch[0m[36m[=2s][0m              redraw every interval and mark changes: green new,
+                         yellow older, red gone. The interval needs the "=".
+
+[1;33mOTHER MACHINES[0m  [2mover ssh; they need snetwork too[0m
+  [32m--via[0m [36mHOST[0m             run on HOST and show its answer here
+  [32m-no-remote[0m             do not ask tailnet routers about the subnets behind them
+                         [2m(full views ask; plain snetwork never does)[0m
+
 [1;33mOUTPUT[0m
   [32m-json[0m                  the same data as JSON
   [32m-no-color[0m              no colour [2m(also off when output is not a terminal)[0m
@@ -14,10 +26,9 @@
   [32m-h, -help[0m [36m[TOPIC][0m      this help [2m· topics:[0m sections[2m,[0m env
 
 [1;33mEXAMPLES[0m
-  snetwork vpn                   [2m# tailnet peers, and which subnets they route[0m
-  snetwork interfaces en0
+  snetwork --active              [2m# everything, probed; pending values show as …[0m
+  snetwork vpn --watch           [2m# tailnet peers, redrawn every 2 s[0m
+  snetwork devices 10.0.1.0/24   [2m# asks the tailnet peer that routes that subnet[0m
   snetwork all > network.txt     [2m# everything, no colour[0m
-  snetwork dhcp -json | jq .
 
-[2mPassive: snetwork reads this machine's own state and sends no packets.
-Flags go before or after the section, and -json and --json both work.[0m
+[2mFlags go before or after the section, and -json and --json both work.[0m

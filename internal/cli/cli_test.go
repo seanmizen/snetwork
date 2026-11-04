@@ -2,13 +2,16 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"flag"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/seanmizen/snetwork/internal/active"
 	"github.com/seanmizen/snetwork/internal/fixture"
 	"github.com/seanmizen/snetwork/internal/render"
 )
@@ -23,19 +26,30 @@ func TestMain(m *testing.M) {
 var now = time.Date(2026, 11, 3, 21, 0, 0, 0, time.UTC)
 
 // snetwork runs the CLI in-process against a fixture scenario, with only
-// the given env vars set.
+// the given env vars set. The scenario "linux" runs as Linux.
 func snetwork(t testing.TB, scenario string, env map[string]string, args ...string) (stdout, stderr string, code int) {
 	t.Helper()
 	dir := filepath.Join("..", "netinfo", "testdata", scenario)
+	goos := "darwin"
+	if scenario == "linux" {
+		goos = "linux"
+	}
+	arp, _ := os.ReadFile(filepath.Join(dir, "arp.txt"))
+	clock := now
 	var out, errOut bytes.Buffer
 	code = Main("test", Env{
 		Args:      args,
 		Stdout:    &out,
 		Stderr:    &errOut,
 		LookupEnv: func(k string) (string, bool) { v, ok := env[k]; return v, ok },
+		GOOS:      goos,
 		Run:       fixture.Runner(dir),
 		WiFi:      fixture.WiFi(dir),
-		Now:       func() time.Time { return now },
+		Prober:    &active.Fake{Neighbours: arp},
+		Now:       func() time.Time { return clock },
+		Sleep:     func(_ context.Context, d time.Duration) { clock = clock.Add(d) },
+		Terminal:  func(io.Writer) (bool, int) { return false, 0 },
+		Frames:    3,
 	})
 	return out.String(), errOut.String(), code
 }
@@ -65,6 +79,19 @@ func TestGolden(t *testing.T) {
 		{"bare", "bare", nil, nil},
 		{"bare_dhcp", "bare", nil, []string{"dhcp"}},
 		{"bare_wifi", "bare", nil, []string{"wifi"}},
+		{"home_active", "home", nil, []string{"--active"}},
+		{"home_active_color", "home", color, []string{"--active"}},
+		{"home_devices_active", "home", nil, []string{"devices", "--active"}},
+		{"home_devices_remote", "home", nil, []string{"devices", "10.40.50.0/24"}},
+		{"home_devices_no_remote", "home", nil, []string{"devices", "-no-remote"}},
+		{"home_internet_passive", "home", nil, []string{"internet"}},
+		{"home_active_json", "home", nil, []string{"vpn", "--active", "-json"}},
+		{"home_watch", "home", nil, []string{"vpn", "--watch=5s"}},
+		{"home_via", "home", nil, []string{"--via", "charlie"}},
+		{"linux", "linux", nil, nil},
+		{"linux_all", "linux", nil, []string{"all"}},
+		{"linux_active", "linux", nil, []string{"--active"}},
+		{"bare_json", "bare", nil, []string{"all", "-json"}},
 		{"help", "home", nil, []string{"-h"}},
 		{"help_color", "home", color, []string{"-h"}},
 		{"help_sections", "home", nil, []string{"-help", "sections"}},
@@ -117,12 +144,28 @@ func TestUsageErrors(t *testing.T) {
 		{[]string{"-bogus"}, `flag provided but not defined: -bogus`},
 		{[]string{"-h", "nope"}, `no help topic "nope"`},
 		// a flag-looking value after a section is still a flag
-		{[]string{"vpn", "-watch=5s"}, `flag provided but not defined: -watch`},
+		{[]string{"vpn", "--watch", "5s"}, `"5s" is not a section. For an interval, join it with "=": --watch=5s`},
+		{[]string{"--active", "30s"}, `--active=30s`},
+		{[]string{"--watch=1x"}, `not an interval`},
+		{[]string{"--watch=100ms"}, `the shortest interval is 500ms`},
+		{[]string{"--watch", "-json"}, `-json and --watch do not mix`},
 	}
 	for _, c := range cases {
 		out, errOut, code := snetwork(t, "home", nil, c.args...)
 		if code != exitUsage || out != "" || !strings.Contains(errOut, c.want) || !strings.Contains(errOut, "snetwork -h") {
 			t.Errorf("%v: exit %d, stdout %q, stderr %q; want exit 2 and %q", c.args, code, out, errOut, c.want)
+		}
+	}
+}
+
+func TestRemoteErrors(t *testing.T) {
+	for host, want := range map[string]string{
+		"delta": "snetwork: delta has no snetwork\n",
+		"echo":  "snetwork: ssh to echo failed: Permission denied (publickey).\n",
+	} {
+		out, errOut, code := snetwork(t, "home", nil, "--via", host)
+		if code != exitError || out != "" || errOut != want {
+			t.Errorf("--via %s: exit %d, stdout %q, stderr %q", host, code, out, errOut)
 		}
 	}
 }

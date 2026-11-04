@@ -26,7 +26,13 @@ const (
 	roleOK    = "green"
 	roleBad   = "red"
 	roleWarn  = "yellow"
+	// roleWait is reserved for pending --active results: nothing else is
+	// purple.
+	roleWait = "141"
 )
+
+// pendingText is what a pending result shows.
+const pendingText = "…"
 
 func (s Style) paint(spec, text string) string {
 	if !s.Color || text == "" || spec == "" {
@@ -138,3 +144,6 @@ func mark(ok bool) string {
 	}
 	return "✗"
 }
+
+// Paint colours text with a colour spec when the style has colour on.
+func (s Style) Paint(spec, text string) string { return s.paint(spec, text) }

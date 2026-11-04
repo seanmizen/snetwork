@@ -26,8 +26,8 @@ vpn                                               snetwork vpn
   tailscale  not installed
 
 firewall                                          snetwork firewall
-  macOS app firewall  off · stealth off
-  pf                  unknown without sudo
+  macOS app firewall  off      stealth off
+  pf                  unknown  needs root
 
 listening                                         snetwork listening
   nothing listens beyond loopback

@@ -1,0 +1,40 @@
+snetwork · other network · 192.168.50.10 on Ethernet · tailnet up
+
+interfaces                                        snetwork interfaces
+  enp1s0   Ethernet       192.168.50.10/24  up       ← default route
+  wlp2s0   Wi-Fi          192.168.50.11/24  up
+  docker0  Docker bridge  172.17.0.1/16     no link
+  + 3 more
+
+subnets                                           snetwork subnets
+  192.168.50.0/24  direct   enp1s0
+  172.17.0.0/16    direct   docker0
+  10.40.50.0/24    via vpn  tailscale → bravo
+  100.64.0.0/10    via vpn  tailscale          tailnet · 2 of 2 peers online
+
+devices                                           snetwork devices
+  192.168.50.0/24  2 seen recently  ARP cache, no scan
+  172.17.0.0/16    0 seen recently  ARP cache, no scan
+  10.40.50.0/24    –                behind bravo · snetwork devices 10.40.50.0/24 asks it
+
+dhcp                                              snetwork dhcp
+  enp1s0  from 192.168.50.1 · 2h lease · 1h left
+          router 192.168.50.1 · dns 192.168.50.1, 1.1.1.1
+  wlp2s0  30m left
+
+dns                                               snetwork dns
+  1  127.0.0.53    systemd-resolved (local stub)  search lan
+  2  192.168.50.1  router, from DHCP              search lan
+
+wifi                                              snetwork wifi
+  example-net · 5 GHz ch 36 · 80 MHz · -52 dBm · 390 Mb/s
+
+vpn                                               snetwork vpn
+  tailscale  connected · bravo ✓  laptop ✓ · no exit node
+
+firewall                                          snetwork firewall
+  ufw       active    rules need root
+  nftables  inactive  rules need root
+
+listening                                         snetwork listening
+  open  3 ports beyond loopback: 22 –, 9100 node_exporter, 41641 tailscaled

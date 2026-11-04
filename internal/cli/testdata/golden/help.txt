@@ -5,6 +5,18 @@ USAGE
   snetwork SECTION [ITEM]       one section in full · see snetwork -h sections
   snetwork all                   every section in full
 
+PROBES  plain snetwork sends no packets
+  --active[=30s]            also probe: sweep this LAN (a /24 at most), ping the
+                         gateway and tailnet peers, time DNS, scan Wi-Fi, ask the
+                         internet. Changes nothing. The interval is for --watch.
+  --watch[=2s]              redraw every interval and mark changes: green new,
+                         yellow older, red gone. The interval needs the "=".
+
+OTHER MACHINES  over ssh; they need snetwork too
+  --via HOST             run on HOST and show its answer here
+  -no-remote             do not ask tailnet routers about the subnets behind them
+                         (full views ask; plain snetwork never does)
+
 OUTPUT
   -json                  the same data as JSON
   -no-color              no colour (also off when output is not a terminal)
@@ -14,10 +26,9 @@ OTHER
   -h, -help [TOPIC]      this help · topics: sections, env
 
 EXAMPLES
-  snetwork vpn                   # tailnet peers, and which subnets they route
-  snetwork interfaces en0
+  snetwork --active              # everything, probed; pending values show as …
+  snetwork vpn --watch           # tailnet peers, redrawn every 2 s
+  snetwork devices 10.0.1.0/24   # asks the tailnet peer that routes that subnet
   snetwork all > network.txt     # everything, no colour
-  snetwork dhcp -json | jq .
 
-Passive: snetwork reads this machine's own state and sends no packets.
 Flags go before or after the section, and -json and --json both work.

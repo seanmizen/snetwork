@@ -12,14 +12,19 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/seanmizen/snetwork/internal/collect"
 	"github.com/seanmizen/snetwork/internal/netinfo"
 )
 
-// Runner reads <dir>/<key>.txt, or <key>.json.
+// Runner reads <dir>/<key>.txt, or <key>.json. <key>.err holds the error
+// message of a source that fails.
 func Runner(dir string) collect.Runner {
 	return func(key string, _ []string) ([]byte, error) {
+		if b, err := os.ReadFile(filepath.Join(dir, key+".err")); err == nil {
+			return nil, errors.New(strings.TrimSpace(string(b)))
+		}
 		for _, ext := range []string{".txt", ".json"} {
 			b, err := os.ReadFile(filepath.Join(dir, key+ext))
 			if err == nil {
