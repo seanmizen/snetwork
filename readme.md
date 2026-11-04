@@ -12,7 +12,7 @@ interfaces                                        snetwork interfaces
   en0    Wi-Fi                10.20.30.102/24  up              ← default route
   utun7  Tailscale            100.64.0.10      up
   en8    USB 10/100/1000 LAN  –                not plugged in
-  + 10 more
+  + 9 more
 
 subnets                                           snetwork subnets
   10.20.30.0/24  direct   en0                alpha routes it when you are away
